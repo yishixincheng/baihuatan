@@ -1,0 +1,33 @@
+version: '3.7'
+services: 
+  master:
+   image: redis:6.0.5
+   container_name: redis-master
+   restart: always
+   ports:
+    - 6379:6379
+   volumes:
+    - /home/redis/master/redis.conf:/etc/usr/local/redis.conf
+    - /home/redis/master/redis.log:/usr/local/redis/logs/redis-server.log
+    
+  slave1:
+    image: redis:6.0.5
+    container_name: redis-slave-1
+    restart: always
+    ports:
+     - 6380:6379
+    command: redis-server --slaveof redis-master 6379
+    volumes:
+     - /home/redis/slave1/redis.conf:/etc/usr/local/redis.conf
+     - /home/redis/slave1/redis.log:/usr/local/redis/logs/redis-server.log
+  
+  slave2:
+    image: redis:6.0.5
+    container_name: redis-slave-2
+    restart: always
+    ports:
+     - 6381:6379
+    command: redis-server --slaveof redis-master 6379
+    volumes:
+     - /home/redis/slave2/redis.conf:/etc/usr/local/redis.conf
+     - /home/redis/slave2/redis.log:/usr/local/redis/logs/redis-server.log

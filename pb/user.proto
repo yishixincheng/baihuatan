@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package pb;
+option go_package = "/pb";
+
+// protoc --go_out=plugins=grpc:. pb/user.proto
+
+service UserService{
+    rpc Check(UserRequest) returns (UserResponse){}
+}
+
+message UserRequest {
+    string username = 1;
+    string password = 2;
+}
+
+message UserResponse {
+    bool result  = 1;
+    int64 userId = 2;
+    string err   = 3;
+}

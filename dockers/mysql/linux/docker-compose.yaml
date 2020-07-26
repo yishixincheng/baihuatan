@@ -1,0 +1,25 @@
+version: '3.7'
+services:
+  mysql:
+    image: mysql:8.0.15
+    container_name: bhtmysql
+    ports:
+    - 8306:3306
+    restart: always
+    command: 
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+      --explicit_defaults_for_timestamp=true
+      --lower_case_table_names=1
+    environment:
+      MYSQL_ROOT_PASSWORD: baihuatan2020
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /home/mysql/data:/var/lib/mysql
+      - /home/mysql/conf.d:/etc/mysql/conf.d
+      - /home/mysql/init:/docker-entrypoint-initdb.d/
+networks:
+  default: null
+volumes:
+  volumes.mysql8.data: null    
