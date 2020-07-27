@@ -1,0 +1,12 @@
+version: '3'
+services: 
+  configserver:
+     image: baihuatan/configserver
+     container_name: bhtconfigserver
+     restart: always
+     ports: 
+       - 8050:8050
+     volumes: 
+       - /home/javaproject:/javaproject
+     command: nohup java -jar /javaproject/config-server.jar & 
+
