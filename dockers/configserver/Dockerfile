@@ -15,5 +15,5 @@ EXPOSE 8050
 VOLUME ["/javaproject"]
 
 # 执行命令
-CMD ["java" "-jar", "/javaproject/config-server.jar", "&"]
-
+#CMD ["java" "-jar", "/javaproject/config-server.jar", "&"]
+CMD ["sh"]
