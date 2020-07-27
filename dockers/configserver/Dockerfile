@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM debian:buster-slim
 
 COPY jdk-14.0.2_linux-x64_bin.tar.gz /opt/jdk-14.0.2_linux-x64_bin.tar.gz
 RUN mkdir -p /opt/java
@@ -15,5 +15,4 @@ EXPOSE 8050
 VOLUME ["/javaproject"]
 
 # 执行命令
-#CMD ["java" "-jar", "/javaproject/config-server.jar", "&"]
-#CMD ["/bin/sh"]
+CMD ["java" "-jar", "/javaproject/config-server.jar", "&"]
