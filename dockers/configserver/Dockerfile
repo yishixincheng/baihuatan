@@ -4,7 +4,7 @@ COPY jdk-14.0.2_linux-x64_bin.tar.gz /opt/jdk-14.0.2_linux-x64_bin.tar.gz
 RUN mkdir -p /opt/java
 
 #解压
-RUN tar -xvf /opt/jdk-14.0.2_linux-x64_bin.tar.gz -C /opt/java
+RUN tar -xzvf /opt/jdk-14.0.2_linux-x64_bin.tar.gz -C /opt/java
 RUN rm -rf /opt/jdk-14.0.2_linux-x64_bin.tar.gz
 #设置环境变量
 ENV JAVA_HOME /opt/java/jdk-14.0.2
