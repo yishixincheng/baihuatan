@@ -4,8 +4,8 @@ LABEL maintainer="yishixincheng@163.com"
 
 COPY jdk-14.0.2_linux-x64_bin.tar.gz /opt/jdk-14.0.2_linux-x64_bin.tar.gz
 
-RUN build_pkgs="build-base linux-headers openssl-dev pcre-dev wget zlib-dev" \
-  && runtime_pkgs="openssl pcre zlib ca-certificates zip gzip" \
+RUN build_pkgs="wget" \
+  && runtime_pkgs="ca-certificates zip gzip" \
   && apt-get update \
   && apt-get install ${build_pkgs} ${runtime_pkgs} \
   && mkdir -p /opt/java \
