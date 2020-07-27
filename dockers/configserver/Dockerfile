@@ -7,7 +7,7 @@ COPY jdk-14.0.2_linux-x64_bin.tar.gz /opt/jdk-14.0.2_linux-x64_bin.tar.gz
 RUN build_pkgs="wget" \
   && runtime_pkgs="ca-certificates zip gzip" \
   && apt-get update \
-  && apt-get install ${build_pkgs} ${runtime_pkgs} \
+  && apt-get install --no-install-recommends --no-install-suggests -y ${build_pkgs} ${runtime_pkgs} \
   && mkdir -p /opt/java \
   && tar xzf /opt/jdk-14.0.2_linux-x64_bin.tar.gz -C /opt/java \
   && rm -rf /opt/jdk-14.0.2_linux-x64_bin.tar.gz
