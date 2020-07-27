@@ -9,7 +9,7 @@ RUN build_pkgs="wget" \
   && apt-get update \
   && apt-get install --no-install-recommends --no-install-suggests -y ${build_pkgs} ${runtime_pkgs} \
   && mkdir -p /opt/java \
-  && tar -xvf /opt/jdk-14.0.2_linux-x64_bin.tar.gz -C /opt/java \
+  && tar -xzvf /opt/jdk-14.0.2_linux-x64_bin.tar.gz -C /opt/java \
   && rm -rf /opt/jdk-14.0.2_linux-x64_bin.tar.gz
 
 #设置环境变量
