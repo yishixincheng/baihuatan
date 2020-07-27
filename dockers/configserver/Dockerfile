@@ -1,5 +1,9 @@
 FROM alpine:latest
 
+RUN build_pkgs="build-base linux-headers openssl-dev pcre-dev wget zlib-dev" \
+  && runtime_pkgs="ca-certificate openssl pcre zlib" \
+  && apk --update add ${build_pkgs} ${runtime_pkgs}
+
 COPY jdk-14.0.2_linux-x64_bin.tar.gz /opt/jdk-14.0.2_linux-x64_bin.tar.gz
 RUN mkdir -p /opt/java
 
