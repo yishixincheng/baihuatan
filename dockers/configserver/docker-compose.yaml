@@ -8,5 +8,5 @@ services:
        - 8050:8050
      volumes: 
        - /home/javaproject:/javaproject
-     command: nohup java -jar /javaproject/config-server.jar & 
+     command: java -jar /javaproject/config-server.jar & 
 
