@@ -16,4 +16,4 @@ VOLUME ["/javaproject"]
 
 # 执行命令
 #CMD ["java" "-jar", "/javaproject/config-server.jar", "&"]
-CMD ["sh"]
+#CMD ["/bin/sh"]
