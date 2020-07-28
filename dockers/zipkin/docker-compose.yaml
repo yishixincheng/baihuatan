@@ -1,0 +1,9 @@
+version: '3'
+services: 
+  zipkin:
+     image: openzipkin/zipkin:2.21.5
+     container_name: bhtzipkin
+     restart: always
+     ports: 
+       - 9411:9411
+       - 9410:9410

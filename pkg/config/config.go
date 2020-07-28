@@ -76,6 +76,9 @@ func LoadRemoteConfig() (err error) {
 		return
 	}
 	configServer := "http://" + serviceInstance.Host + ":" + strconv.Itoa(serviceInstance.Port)
+
+	fmt.Print(configServer)
+
 	confAddr := fmt.Sprintf("%v/%v/%v-%v.%v",
 		configServer, bootstrap.ConfigServerConfig.Label,
 		bootstrap.DiscoverConfig.ServiceName,
