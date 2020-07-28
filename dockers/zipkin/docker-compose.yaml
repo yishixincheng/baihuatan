@@ -1,7 +1,7 @@
 version: '3'
 services: 
   zipkin:
-     image: openzipkin/zipkin:2.21.5
+     image: openzipkin/zipkin
      container_name: bhtzipkin
      restart: always
      ports: 
