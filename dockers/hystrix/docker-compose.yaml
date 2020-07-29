@@ -5,5 +5,4 @@ services:
       container_name: hystix-dashboard
       restart: always
       ports: 
-        - 10087:8080
-        
+        - 7080:8080
