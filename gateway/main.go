@@ -27,8 +27,6 @@ func main() {
 	)
 	flag.Parse()
 
-	fmt.Println(zipkinURL)
-
 	// 创建日志组件
 	var logger log.Logger
 	{
@@ -58,7 +56,7 @@ func main() {
 		}
 	}
 	// 注册服务
-	register.Register()
+	//register.Register()
 
 	tags := map[string]string{
 		"component" : "gateway_server",

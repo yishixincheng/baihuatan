@@ -2,6 +2,7 @@ package discover
 
 import (
 	"baihuatan/pkg/common"
+	"fmt"
 	"log"
 	"strconv"
 
@@ -32,7 +33,7 @@ func NewDiscoveryClientInstance(consulHost string, consulPort string) *Discovery
 }
 
 // Register 向Consul中心注册实例
-func (consulClient *DiscoveryClientInstance) Register(instanceId, svcHost, healthCheckUrl, svcPort string, 
+func (consulClient *DiscoveryClientInstance) Register(instanceID, svcHost, healthCheckURL, svcPort string, 
 														svcName string, 
 														weight int, 
 														meta map[string]string, 
@@ -40,7 +41,7 @@ func (consulClient *DiscoveryClientInstance) Register(instanceId, svcHost, healt
 														logger *log.Logger) bool {
 	port, _ := strconv.Atoi(svcPort)
 	serviceRegistration := &api.AgentServiceRegistration{
-		ID:		   instanceId,
+		ID:		   instanceID,
 		Name:      svcName,
 		Address:   svcHost,
 		Port:      port,
@@ -51,7 +52,7 @@ func (consulClient *DiscoveryClientInstance) Register(instanceId, svcHost, healt
 		},
 		Check: &api.AgentServiceCheck{
 			DeregisterCriticalServiceAfter: "30s",
-			HTTP:                           "http://" + svcHost + ":" + strconv.Itoa(port) + healthCheckUrl,
+			HTTP:                           "http://" + svcHost + ":" + strconv.Itoa(port) + healthCheckURL,
 			Interval:                       "15s",
 		},
 	}
@@ -60,6 +61,8 @@ func (consulClient *DiscoveryClientInstance) Register(instanceId, svcHost, healt
 
 	if err != nil {
 		if logger != nil {
+			fmt.Printf("错误：%v \n", err)
+			fmt.Println("http://" + svcHost + ":" + strconv.Itoa(port) + healthCheckURL)
 			logger.Println("Register Service Error!")
 		}
 		return false
@@ -71,10 +74,10 @@ func (consulClient *DiscoveryClientInstance) Register(instanceId, svcHost, healt
 }
 
 // DeRegister 注销实例
-func (consulClient *DiscoveryClientInstance) DeRegister(instanceId string, logger *log.Logger) bool {
+func (consulClient *DiscoveryClientInstance) DeRegister(instanceID string, logger *log.Logger) bool {
 	// 构建包含服务实例 ID 的源数结构体
 	serviceRegistration := &api.AgentServiceRegistration{
-		ID: instanceId,
+		ID: instanceID,
 	}
 	err := consulClient.client.Deregister(serviceRegistration)
 

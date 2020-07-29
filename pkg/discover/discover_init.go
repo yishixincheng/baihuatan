@@ -70,8 +70,8 @@ func Register() {
 		   Logger.Printf("register services %s failed.", bootstrap.DiscoverConfig.ServiceName)
 		   // 注册失败，服务启动失败
 		   panic(0)
-	   }
-	   Logger.Printf(bootstrap.DiscoverConfig.ServiceName + "-service for service %s success.", bootstrap.DiscoverConfig.ServiceName)
+	}
+	Logger.Printf(bootstrap.DiscoverConfig.ServiceName + "-service for service %s success.", bootstrap.DiscoverConfig.ServiceName)
 }
 
 // Deregister 注销服务
