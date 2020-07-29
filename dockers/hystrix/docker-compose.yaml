@@ -6,3 +6,4 @@ services:
       restart: always
       ports: 
         - 7080:8080
+        - 7002:9002
