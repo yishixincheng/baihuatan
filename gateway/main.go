@@ -73,11 +73,11 @@ func main() {
 
 	errc := make(chan error)
 
-	// 启用hystrix实时监控，监听端口为9010
+	// 启用hystrix实时监控，监听端口为9089
 	hystrixStreamHandler := hystrix.NewStreamHandler()
 	hystrixStreamHandler.Start()
 	go func() {
-		errc <- http.ListenAndServe(net.JoinHostPort("", "9010"), hystrixStreamHandler)
+		errc <- http.ListenAndServe(net.JoinHostPort("", "9089"), hystrixStreamHandler)
 	}()
 
 	go func() {

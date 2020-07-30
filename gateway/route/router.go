@@ -57,7 +57,12 @@ func (router HystrixRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// 检查是否已加入监控
 	if _, ok := router.svcMap.Load(serviceName); !ok {
 		// 把serviceName作为命令对象，设置参数
-		hystrix.ConfigureCommand(serviceName, hystrix.CommandConfig{Timeout: 1000})
+		hystrix.ConfigureCommand(serviceName, hystrix.CommandConfig{Timeout: 1000, //请求超时进入熔断状态
+			RequestVolumeThreshold: 10,     // 最小数量10，才开启断路器功能
+			SleepWindow: 10,                // 断路器开启后，超过10秒进入半开状态，请求全部成功，可用则进入关闭状态，否则断路器重新打开
+			ErrorPercentThreshold: 90,      // 当SleepWindow秒时，错误率达到90%，则断路器打开
+			MaxConcurrentRequests: 1000,    // 允许的最大并发数
+		})
 		router.svcMap.Store(serviceName, serviceName)
 	}
 
@@ -109,7 +114,11 @@ func (router HystrixRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return errors.New(router.fallbackMsg)
 	})
 
-
+	// Do方法执行失败，响应错误信息
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte(err.Error()))
+	}
 }
 
 func preFilter(r *http.Request) bool {
