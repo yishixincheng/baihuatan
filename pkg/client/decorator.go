@@ -100,7 +100,7 @@ func genTracer(tracer opentracing.Tracer) opentracing.Tracer {
 	zipkinRecorder := bootstrap.HTTPConfig.Host + ":" + bootstrap.HTTPConfig.Port
 
 	reporter := zipkinhttp.NewReporter(zipkinURL)
-	defer reporter.Close()
+	//defer reporter.Close()
 
 	// create our local service endpoint
 	ept, err := zipkin.NewEndpoint(bootstrap.DiscoverConfig.ServiceName, zipkinRecorder)

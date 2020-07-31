@@ -77,6 +77,7 @@ func main() {
 	hystrixStreamHandler := hystrix.NewStreamHandler()
 	hystrixStreamHandler.Start()
 	go func() {
+		logger.Log("hystrix","HTTP", "addr","9089")
 		errc <- http.ListenAndServe(net.JoinHostPort("", "9089"), hystrixStreamHandler)
 	}()
 
