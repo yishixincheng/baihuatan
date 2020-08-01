@@ -18,3 +18,6 @@ func (s *CommentService) HealthCheck() bool {
 func NewCommentService() *CommentService {
 	return &CommentService{}
 }
+
+// ServiceMiddleware 中间件
+type ServiceMiddleware func(Service) Service
