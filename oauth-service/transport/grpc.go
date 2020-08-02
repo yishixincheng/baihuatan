@@ -4,7 +4,6 @@ import (
 	"baihuatan/pb"
 	endpts "baihuatan/oauth-service/endpoint"
 	"context"
-	"baihuatan/oauth-service/model"
 	"github.com/go-kit/kit/transport/grpc"
 )
 
@@ -25,9 +24,9 @@ func NewGRPCServer(ctx context.Context, endpoints endpts.OAuth2Endpoints, server
 	return &grpcServer{
 		checkTokenServer: grpc.NewServer(
 			 endpoints.GRPCCheckTokenEndpoint,
-			 DecodeGRPC
-
+			 DecodeGRPCCheckTokenRequest,
+			 EncodeGRPCCheckTokenResponse,
+			 serverTracer,
 		),
 	}
 }
-
