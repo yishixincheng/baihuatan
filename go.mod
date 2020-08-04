@@ -9,6 +9,7 @@ require (
 	github.com/etcd-io/etcd v3.3.22+incompatible
 	github.com/go-kit/kit v0.10.0
 	github.com/go-redis/redis v6.15.8+incompatible
+	github.com/go-sql-driver/mysql v1.4.0
 	github.com/gohouse/gorose/v2 v2.1.7
 	github.com/golang/protobuf v1.4.2
 	github.com/gorilla/mux v1.7.3

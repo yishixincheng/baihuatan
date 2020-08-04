@@ -236,7 +236,7 @@ func (tokenService *DefaultTokenService) RefreshAccessToken(refreshTokenValue st
 		oauth2Details, err := tokenService.tokenStore.ReadOAuth2DetailsForRefreshToken(refreshTokenValue)
 		// 移除原有访问令牌
 		if err == nil {
-			oauth2Token, err := tokenService.tokenStore.GetAccessToken(oauth2Detail)
+			oauth2Token, err := tokenService.tokenStore.GetAccessToken(oauth2Details)
 			// 移除原有的访问令牌
 			if err == nil {
 				tokenService.tokenStore.RemoveAccessToken(oauth2Token.TokenValue)

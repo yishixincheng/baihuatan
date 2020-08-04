@@ -130,7 +130,22 @@ type CheckTokenResponse struct {
 }
 
 // MakeCheckTokenEndpoint -
-func MakeCheckTokenEndpoint(svc service.TokenService) 
+func MakeCheckTokenEndpoint(svc service.TokenService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(*CheckTokenRequest)
+		tokenDetails, err := svc.GetOAuth2DetailsByAccessToken(req.Token)
+
+		var errString = ""
+		if err != nil {
+			errString = err.Error()
+		}
+
+		return CheckTokenResponse{
+			OAuthDetails: tokenDetails,
+			Error: errString,
+		}, nil
+	}
+}
 
 // SimpleRequest - 
 type SimpleRequest struct {

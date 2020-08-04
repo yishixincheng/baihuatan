@@ -44,7 +44,7 @@ func (p *ClientDetailsModel) getTableName() string {
 // GetClientDetailsByClientID 获取客户端信息
 func (p *ClientDetailsModel) GetClientDetailsByClientID(clientID string) (*ClientDetails, error) {
 	conn  := mysql.DB()
-	if result, err := conn.Table(p.getTableName()).Where(map[string]interface{"client_id": clientID}).First(); err == nil {
+	if result, err := conn.Table(p.getTableName()).Where(map[string]interface{}{"client_id": clientID}).First(); err == nil {
 
 		var authorizedGrantTypes [] string
 		_ = json.Unmarshal([]byte(result["authorized_grant_types"].(string)), &authorizedGrantTypes)
@@ -57,9 +57,9 @@ func (p *ClientDetailsModel) GetClientDetailsByClientID(clientID string) (*Clien
 			RegisteredRedirectURI: result["registered_redirect_uri"].(string),
 			AuthorizedGrantTypes: authorizedGrantTypes,	
 		}, nil
+	} else {
+		return nil, err
 	}
-
-	return nil, err
 }
 
 // CreateClientDetails 创建客户端详情

@@ -5,8 +5,6 @@ import (
 	"baihuatan/oauth-service/model"
 	"baihuatan/pb"
 	"context"
-
-	"github.com/dgrijalva/jwt-go/request"
 )
 
 // EncodeGRPCCheckTokenRequest -
