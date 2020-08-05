@@ -3,7 +3,7 @@ package main
 import (
 	localconf "baihuatan/oauth-service/config"
 	endpts "baihuatan/oauth-service/endpoint"
-	"baihuatan/oauth-service/plugin"
+	"baihuatan/pkg/ratelimiter"
 	"baihuatan/oauth-service/service"
 	"baihuatan/oauth-service/transport"
 	"baihuatan/pb"
@@ -28,8 +28,6 @@ import (
 )
 
 func main() {
-
-	fmt.Println("111111111111")
 	fmt.Println(bootstrap.HTTPConfig.Host)
 	var (
 		servicePort = flag.String("service.port", bootstrap.HTTPConfig.Port, "service port")
@@ -72,16 +70,16 @@ func main() {
 
 	tokenEndpoint := endpts.MakeTokenEndpoint(tokenGranter, clientDetailsService)
 	tokenEndpoint = endpts.MakeClientAuthorizationMiddleware(localconf.Logger)(tokenEndpoint)
-	tokenEndpoint = plugin.NewTokenBucketLimitterWithBuildIn(ratebucket)(tokenEndpoint)
+	tokenEndpoint = ratelimiter.NewTokenBucketLimiterWithBuildIn(ratebucket)(tokenEndpoint)
 	tokenEndpoint = kitzipkin.TraceEndpoint(localconf.ZipkinTracer, "token-endpoint")(tokenEndpoint)
 
 	checkTokenEndpoint := endpts.MakeCheckTokenEndpoint(tokenService)
 	checkTokenEndpoint = endpts.MakeClientAuthorizationMiddleware(localconf.Logger)(checkTokenEndpoint)
-	checkTokenEndpoint = plugin.NewTokenBucketLimitterWithBuildIn(ratebucket)(checkTokenEndpoint)
+	checkTokenEndpoint = ratelimiter.NewTokenBucketLimiterWithBuildIn(ratebucket)(checkTokenEndpoint)
 	checkTokenEndpoint = kitzipkin.TraceEndpoint(localconf.ZipkinTracer, "check-endpoint")(tokenEndpoint)
 
 	gRPCCheckTokenEndpoint := endpts.MakeCheckTokenEndpoint(tokenService)
-	gRPCCheckTokenEndpoint = plugin.NewTokenBucketLimitterWithBuildIn(ratebucket)(gRPCCheckTokenEndpoint)
+	gRPCCheckTokenEndpoint = ratelimiter.NewTokenBucketLimiterWithBuildIn(ratebucket)(gRPCCheckTokenEndpoint)
 	gRPCCheckTokenEndpoint = kitzipkin.TraceEndpoint(localconf.ZipkinTracer, "grpc-check-endpoint")(gRPCCheckTokenEndpoint)
 
 	// 创建健康检查的Endpoint
