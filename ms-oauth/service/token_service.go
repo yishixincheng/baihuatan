@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"time"
-	"baihuatan/oauth-service/model"
+	"baihuatan/ms-oauth/model"
 )
 
 var (

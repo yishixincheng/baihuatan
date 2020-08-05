@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"errors"
-	"baihuatan/oauth-service/model"
+	"baihuatan/ms-oauth/model"
 )
 
 var (

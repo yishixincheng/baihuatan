@@ -1,11 +1,11 @@
 package main
 
 import (
-	localconf "baihuatan/oauth-service/config"
-	endpts "baihuatan/oauth-service/endpoint"
+	localconf "baihuatan/ms-oauth/config"
+	endpts "baihuatan/ms-oauth/endpoint"
 	"baihuatan/pkg/ratelimiter"
-	"baihuatan/oauth-service/service"
-	"baihuatan/oauth-service/transport"
+	"baihuatan/ms-oauth/service"
+	"baihuatan/ms-oauth/transport"
 	"baihuatan/pb"
 	"baihuatan/pkg/bootstrap"
 	conf "baihuatan/pkg/config"

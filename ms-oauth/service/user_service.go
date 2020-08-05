@@ -1,7 +1,7 @@
 package service
 
 import (
-	"baihuatan/oauth-service/model"
+	"baihuatan/ms-oauth/model"
 	"baihuatan/pb"
 	"baihuatan/pkg/client"
 	"context"

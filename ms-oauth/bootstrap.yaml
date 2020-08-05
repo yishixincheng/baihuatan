@@ -10,7 +10,7 @@ rpc:
 discover:
   host: 192.168.43.251
   port: 8500
-  instanceId: oauth-service-baihuatan
+  instanceId: ms-oauth-baihuatan
   serviceName: oauth
   weight: 10
 
@@ -20,7 +20,7 @@ trace:
   url: /api/v2/spans
 
 config:
-  id: config-service
+  id: ms-oauth
   profile: "dev"
   label: "master"
 

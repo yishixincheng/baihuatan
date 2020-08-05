@@ -1,8 +1,8 @@
 package endpoint
 
 import (
-	"baihuatan/oauth-service/model"
-	"baihuatan/oauth-service/service"
+	"baihuatan/ms-oauth/model"
+	"baihuatan/ms-oauth/service"
 	"context"
 	"errors"
 	"net/http"

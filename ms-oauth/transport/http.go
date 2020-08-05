@@ -1,8 +1,8 @@
 package transport
 
 import (
-	endpts "baihuatan/oauth-service/endpoint"
-	"baihuatan/oauth-service/service"
+	endpts "baihuatan/ms-oauth/endpoint"
+	"baihuatan/ms-oauth/service"
 	"context"
 	"encoding/json"
 	"errors"

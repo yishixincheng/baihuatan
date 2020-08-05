@@ -2,7 +2,7 @@ package transport
 
 import (
 	"baihuatan/pb"
-	endpts "baihuatan/oauth-service/endpoint"
+	endpts "baihuatan/ms-oauth/endpoint"
 	"context"
 	"github.com/go-kit/kit/transport/grpc"
 )
