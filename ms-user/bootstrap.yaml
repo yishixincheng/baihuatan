@@ -1,0 +1,32 @@
+
+http:
+  host: 192.168.43.94
+  port: 9010
+
+rpc:
+  host: 192.168.43.94
+  port: 9108
+
+discover:
+  host: 192.168.43.251
+  port: 8500
+  instanceId: ms-user-baihuatan
+  serviceName: user
+  weight: 1
+
+trace:
+  host: 192.168.43.251
+  port: 9411
+  url: /api/v2/spans
+
+config:
+  id: ms-user
+  profile: "dev"
+  label: "master"
+
+mysql:
+  host: 192.168.43.251
+  port: 8306
+  user: baihuatandb
+  pwd: baihuatan2020
+  db: bht_oauth

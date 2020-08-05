@@ -137,4 +137,3 @@ func main() {
 	register.Deregister()
 	fmt.Println(error)
 }
-
