@@ -1,13 +1,13 @@
 package main
 
 import (
+	localconf "baihuatan/ms-user/config"
 	endpts "baihuatan/ms-user/endpoint"
 	"baihuatan/ms-user/service"
 	"baihuatan/ms-user/transport"
 	"baihuatan/pb"
 	"baihuatan/pkg/bootstrap"
 	conf "baihuatan/pkg/config"
-	localconf "baihuatan/pkg/config"
 	register "baihuatan/pkg/discover"
 	"baihuatan/pkg/mysql"
 	"context"
@@ -91,7 +91,6 @@ func main() {
 						conf.MysqlConfig.User,
 						conf.MysqlConfig.Pwd,
 						conf.MysqlConfig.Db)
-		
 		// 注册
 		register.Register()
 		handler := r
@@ -100,8 +99,8 @@ func main() {
 
 	// grpc server
 	go func() {
-		fmt.Println("grpc Server start at port" + *grpcAddr)
-		listener, err := net.Listen("tcp", *grpcAddr)
+		fmt.Println("grpc Server start at port:" + *grpcAddr)
+		listener, err := net.Listen("tcp", ":" + *grpcAddr)
 		if err != nil {
 			errChan <- err
 			return

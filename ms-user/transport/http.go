@@ -39,7 +39,7 @@ func MakeHttpHandler(ctx context.Context, endpoints endpts.UserEndpoints, zipkin
 
 	r.Path("metrics").Handler(promhttp.Handler())
 
-	r.Methods("GET").Path("health").Handler(kithttp.NewServer(
+	r.Methods("GET").Path("/health").Handler(kithttp.NewServer(
 		endpoints.HealthCheckEndpoint,
 		decodeHealthCheckRequest,
 		encodeUserResponse,

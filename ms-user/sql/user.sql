@@ -1,6 +1,6 @@
 create database bht_user;
 
-CREATE TABLE IS NOT EXSITS  `user` (
+CREATE TABLE IF NOT EXISTS  `user` (
     `user_id`     INT(10)      NOT NULL AUTO_INCREMENT,
     `user_name`   VARCHAR(64)  NOT NULL DEFAULT '',
     `password`    VARCHAR(128) NOT NULL DEFAULT '',
@@ -10,4 +10,4 @@ CREATE TABLE IS NOT EXSITS  `user` (
     PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-insert into user (`user_name`, 'password') values ('user', 'password')
+insert into user (`user_name`, `password`) values ('user', 'password')
