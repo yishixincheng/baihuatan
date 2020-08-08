@@ -29,4 +29,4 @@ mysql:
   port: 8306
   user: baihuatandb
   pwd: baihuatan2020
-  db: bht_oauth
+  db: bht_user

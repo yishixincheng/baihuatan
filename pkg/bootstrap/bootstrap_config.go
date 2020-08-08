@@ -36,6 +36,7 @@ func initBootstrapConfig() {
 	viper.SetConfigName("bootstrap")
 	// 添加读取的配置文件路径
 	viper.AddConfigPath("./")
+	viper.AddConfigPath("../config")
 
 	// windows环境下为%GOPATH，linux环境下为$GOPATH
 	//configPath := common.GetGOPATH() + "/src"
