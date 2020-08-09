@@ -20,7 +20,7 @@ var ZipkinTracer *zipkin.Tracer
 // Logger -
 var Logger log.Logger
 
-func init() {
+func init()  {
 	Logger = log.NewLogfmtLogger(os.Stderr)
 	Logger = log.With(Logger, "ts", log.DefaultTimestampUTC)
 	Logger = log.With(Logger, "caller", log.DefaultCaller)
@@ -41,18 +41,19 @@ func init() {
 
 	zipkinURL := "http://" + conf.TraceConfig.Host + ":" + conf.TraceConfig.Port + conf.TraceConfig.Url
 	Logger.Log("zipkin url", zipkinURL)
+
 	initTracer(zipkinURL)
 }
 
-func initDefault() {
+func initDefault()  {
 	viper.SetDefault(KConfigType, "yaml")
 }
 
 func initTracer(zipkinURL string)  {
 	var (
-		err            error
-		useNoopTracer  = zipkinURL == ""
-		reporter       = zipkinhttp.NewReporter(zipkinURL)
+		err             error
+		useNoopTracer   = zipkinURL == ""
+		reporter        = zipkinhttp.NewReporter(zipkinURL)
 	)
 	// defer reporter.Close()
 	zEP, _ := zipkin.NewEndpoint(bootstrap.DiscoverConfig.ServiceName, bootstrap.HTTPConfig.Port)
@@ -66,4 +67,5 @@ func initTracer(zipkinURL string)  {
 	if !useNoopTracer {
 		Logger.Log("tracer", "Zipkin", "type", "Native", "URL", zipkinURL)
 	}
+
 }
