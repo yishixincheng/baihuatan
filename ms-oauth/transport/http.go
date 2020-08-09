@@ -6,7 +6,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
+
 	"github.com/go-kit/kit/log"
 	kitzipkin "github.com/go-kit/kit/tracing/zipkin"
 	"github.com/go-kit/kit/transport"
@@ -48,14 +50,14 @@ func MakeHTTPHandler(ctx context.Context, endpoints endpts.OAuth2Endpoints,
 		zipkinServer,
 	}
 	
-	r.Methods("POST").Path("/oauth/token").Handler(kithttp.NewServer(
+	r.Methods("POST").Path("/token").Handler(kithttp.NewServer(
 		endpoints.TokenEndpoint,
 		decodeTokenRequest,
 		encodeJSONResponse,
 		clientAuthorizationOptions...,
 	))
 	
-	r.Methods("POST").Path("/oauth/check_token").Handler(kithttp.NewServer(
+	r.Methods("POST").Path("/check_token").Handler(kithttp.NewServer(
 		endpoints.CheckTokenEndpoint,
 		decodeCheckTokenRequest,
 		encodeJSONResponse,
@@ -89,6 +91,7 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 func makeClientAuthorizationContext(clientDetailsService service.ClientDetailsService, logger log.Logger) kithttp.RequestFunc {
 	return func(ctx context.Context, r *http.Request) context.Context {
 		if clientID, clientSecret, ok := r.BasicAuth(); ok {
+			fmt.Println("baasic:" + clientID + ":" + clientSecret)
 			clientDetails, err := clientDetailsService.GetClientDetailByClientID(ctx, clientID, clientSecret)
 		    if err == nil {
 				return context.WithValue(ctx, endpts.OAuth2ClientDetailsKey, clientDetails)

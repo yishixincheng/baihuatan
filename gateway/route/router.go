@@ -80,7 +80,7 @@ func (router HystrixRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			destPath := strings.Join(pathArray[2:], "/")
 
 			// 随机选择一个服务实例
-			router.logger.Log("service id", serviceInstance.Host, serviceInstance.Port)
+			router.logger.Log("service-host:", serviceInstance.Host, "port:", serviceInstance.Port)
 
 			// 设置代理服务地址信息
 			req.URL.Scheme = "http"
@@ -135,6 +135,7 @@ func preFilter(r *http.Request) bool {
 
 	authToken := r.Header.Get("Authorization")
 	if authToken == "" {
+		fmt.Println("authorization is empty")
 		return false
 	}
 	oauthClient, _ := client.NewOAuthClient("oauth", nil, nil)

@@ -25,7 +25,7 @@ func NewUserModel() *UserModel {
 }
 
 func (p *UserModel) getTableName() string {
-	return "bht_user"
+	return "user"
 }
 
 // GetUserList - 

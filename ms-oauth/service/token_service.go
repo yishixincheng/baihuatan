@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"time"
 	"baihuatan/ms-oauth/model"
+	"fmt"
 )
 
 var (
@@ -16,8 +17,10 @@ var (
 	ErrNotSupportGrantType = errors.New("grant type is not supported")
 	// ErrNotSupportOperation -
 	ErrNotSupportOperation = errors.New("no support operation")
+	// ErrNotEmptyUsernameAndPasswordRequest -
+	ErrNotEmptyUsernameAndPasswordRequest = errors.New("username or password must required")
 	// ErrInvalidUsernameAndPasswordRequest -
-	ErrInvalidUsernameAndPasswordRequest = errors.New("invalid username, password")
+	// ErrInvalidUsernameAndPasswordRequest = errors.New("invalid username, password")
 	// ErrInvalidTokenRequest -
 	ErrInvalidTokenRequest = errors.New("invalid token")
 	// ErrExpiredToken -
@@ -95,13 +98,15 @@ func (tokenGranter *UsernamePasswordTokenGranter) Grant(ctx context.Context, gra
 	password := reader.FormValue("password")
 
 	if username == "" || password == "" {
-		return nil, ErrInvalidUsernameAndPasswordRequest
+		return nil, ErrNotEmptyUsernameAndPasswordRequest
 	}
 	// 验证用户名密码是否正确
+	fmt.Println("username and password:" + username + ":" +password)
 	userDetails, err := tokenGranter.userDetailsService.GetUserDetailByUsername(ctx, username, password)
 
 	if err != nil {
-		return nil, ErrInvalidUsernameAndPasswordRequest
+		return nil, err
+		//return nil, ErrInvalidUsernameAndPasswordRequest
 	}
 
 	// 根据用户信息和客户端信息生成访问令牌

@@ -6,6 +6,7 @@ import (
 	"baihuatan/pkg/client"
 	"context"
 	"errors"
+	"fmt"
 )
 
 var (
@@ -40,6 +41,7 @@ func (service *RemoteUserService) GetUserDetailByUsername(ctx context.Context, u
 				Password: password,
 			}, nil
 		}
+		fmt.Println(response)
 		return nil, ErrInvalidUserInfo
 	}
 	return nil, err

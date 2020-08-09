@@ -5,6 +5,7 @@ import (
 	"baihuatan/pkg/discover"
 	"baihuatan/pkg/loadbalance"
 	"context"
+	"fmt"
 
 	"github.com/opentracing/opentracing-go"
 )
@@ -30,7 +31,8 @@ func (impl *UserClientImpl) CheckUser(ctx context.Context, tracer opentracing.Tr
 	response := new(pb.UserResponse)
 	if err := impl.manager.DecoratorInvoke(ctx, "/pb.UserService/Check", "user_check", tracer, request, response); err != nil {
 		return  nil, err
-	} 
+	}
+	fmt.Println(response, "grpc接口返回")
 	return response, nil	
 }
 

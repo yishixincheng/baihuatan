@@ -42,7 +42,7 @@ func main() {
 	ctx := context.Background()
 	errChan := make(chan error)
 
-	// 每秒钟产生一个令牌，最大100
+	// 每秒钟产生100令牌
 	ratebucket := rate.NewLimiter(rate.Every(time.Second * 1), 100)
 
 	var (

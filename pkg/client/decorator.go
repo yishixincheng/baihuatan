@@ -8,16 +8,18 @@ import (
 	"baihuatan/pkg/loadbalance"
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"strconv"
 	"time"
+
 	"github.com/afex/hystrix-go/hystrix"
 	"github.com/grpc-ecosystem/grpc-opentracing/go/otgrpc"
 	"github.com/opentracing/opentracing-go"
-	"google.golang.org/grpc"
+	zipkinot "github.com/openzipkin-contrib/zipkin-go-opentracing"
 	"github.com/openzipkin/zipkin-go"
 	zipkinhttp "github.com/openzipkin/zipkin-go/reporter/http"
-	zipkinot "github.com/openzipkin-contrib/zipkin-go-opentracing"
+	"google.golang.org/grpc"
 )
 
 var (
@@ -63,12 +65,16 @@ func (manager *DefaultClientManager) DecoratorInvoke(ctx context.Context, path s
 		instances := manager.discoveryClient.DiscoverServices(manager.serviceName, manager.logger)
 		if instance, err := manager.LoadBalance.SelectService(instances); err == nil {
 			if instance.GrpcPort > 0 {
+				fmt.Println(instance.GrpcPort)
 				if conn, err := grpc.Dial(instance.Host + ":" + strconv.Itoa(instance.GrpcPort), grpc.WithInsecure(),
 				    grpc.WithUnaryInterceptor(otgrpc.OpenTracingClientInterceptor(genTracer(tracer))), grpc.WithTimeout(1*time.Second)); err == nil {
 					if err = conn.Invoke(ctx, path, inputVal, outVal); err != nil {
+						fmt.Println(err,"1")
 						return err
 					}
+					fmt.Println("grpc:success")
 				} else {
+					fmt.Println(err,"2")
 					return err
 				}
 			} else {
