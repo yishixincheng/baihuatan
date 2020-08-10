@@ -1,7 +1,6 @@
 package model
 
 import (
-	"github.com/gohouse/gorose/v2"
 	"baihuatan/pkg/mysql"
 	"log"
 )
@@ -39,7 +38,7 @@ func (p *KpkScoreModel) IncScore(userID int64, score int64) bool {
 	return false
 }
 
-// GetKpkScore
+// GetKpkScore -
 func (p *KpkScoreModel) GetKpkScore(userID int64) (*KpkScore, error) {
 	conn := mysql.DB()
 	sql := conn.Table(&KpkScore{})
