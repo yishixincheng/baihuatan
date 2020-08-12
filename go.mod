@@ -13,6 +13,7 @@ require (
 	github.com/gohouse/gorose/v2 v2.1.7
 	github.com/golang/protobuf v1.4.2
 	github.com/gorilla/mux v1.7.3
+	github.com/gorilla/websocket v1.4.2
 	github.com/grpc-ecosystem/grpc-opentracing v0.0.0-20180507213350-8e809c8a8645
 	github.com/hashicorp/consul/api v1.5.0
 	github.com/juju/ratelimit v1.0.1
