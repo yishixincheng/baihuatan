@@ -35,6 +35,10 @@ func init()  {
 		Logger.Log("Fail to parse mysql", err)
 	}
 
+	if err := conf.Sub("redis", &conf.Redis); err != nil {
+		Logger.Log("Fail to parse redis", err)
+	}
+
 	if err := conf.Sub("trace", &conf.TraceConfig); err != nil {
 		Logger.Log("Fail to parse trace", err)
 	}

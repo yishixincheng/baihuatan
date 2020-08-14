@@ -37,12 +37,6 @@ type MysqlConf struct {
 // RedisConf 配置
 type RedisConf struct {
 	RedisConn             *redis.Client //链接
-	Proxy2layerQueueName  string        //队列名
-	Layer2proxyQueueName  string        //队列名
-	IDBlackListHash       string        //用户黑名单hash表
-	IPBlackListHash       string 
-	IDBlackListQueue      string        //用户黑名单队列
-	IPBlackListQueue      string        //IP黑名单队列
 	Host                  string
 	Password              string
 	Db                    int

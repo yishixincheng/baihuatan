@@ -18,3 +18,7 @@ type KpkService struct {
 func (o KpkService) HealthCheck() bool {
 	return true
 }
+
+
+// ServiceMiddleware define service middleware
+type ServiceMiddleware func(Service) Service
