@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-
+	"baihuatan/ms-game-kpk/ws"
 	"github.com/go-kit/kit/log"
 	kitzipkin "github.com/go-kit/kit/tracing/zipkin"
 	"github.com/go-kit/kit/transport"
@@ -34,9 +34,9 @@ func MakeHTTPHandler(ctx context.Context, endpoints endpts.KpkEndpoints, zipkinT
 
 	r.Path("metrics").Handler(promhttp.Handler())
 
-	// 启动websocket链接
+	// 启动websocket长连接
 	r.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		
+		ws.ServeWs(ws.RoomM, w, r)
 	})
 
 	r.Methods("GET").Path("/health").Handler(kithttp.NewServer(

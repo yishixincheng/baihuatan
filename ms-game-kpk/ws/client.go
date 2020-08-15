@@ -125,13 +125,18 @@ func (c *Client) writePump() {
 	}
 }
 
-// serveWs handles websocket requests from the peer.
-func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
+// ServeWs handles websocket requests from the peer.
+func ServeWs(roomM *RoomManager, w http.ResponseWriter, r *http.Request) {
+
+	// 获取用户信息
+	roomM.GetKpkUser(r.Header.Get("Bhtuser"))
+	
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
 		return
 	}
+	// 获取用户信息
 	client := &Client{
 		hub: hub,
 		conn: conn,

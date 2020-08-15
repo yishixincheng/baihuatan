@@ -81,7 +81,7 @@ func main() {
 	}
 
 	// 创建http.Handler
-	r := transport.MakeHttpHandler(ctx, endpoints, localconf.ZipkinTracer, localconf.Logger)
+	r := transport.MakeHTTPHandler(ctx, endpoints, localconf.ZipkinTracer, localconf.Logger)
 
 	// http server
 	go func() {

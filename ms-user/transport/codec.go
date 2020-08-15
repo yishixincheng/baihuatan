@@ -52,3 +52,38 @@ func DecodeGRPCUserResponse(_ context.Context, r interface{}) (interface{}, erro
 		Error:  errors.New(resp.Err),
 	}, nil
 }
+
+
+// DecodeGRPCUserGetRequest -
+func DecodeGRPCUserGetRequest(ctx context.Context, r interface{}) (interface{}, error) {
+	req := r.(*pb.UserGetRequest)
+	return endpts.UserGetRequest{
+		UserID: req.UserID,
+	}, nil
+}
+
+// EncodeGRPCUserGetResponse -
+func EncodeGRPCUserGetResponse(_ context.Context, r interface{}) (interface{}, error) {
+	resp := r.(endpts.UserGetResponse)
+	
+	if resp.Error != nil {
+		return &pb.UserGetResponse{
+			Result: bool(resp.Result),
+			Err:  "error",
+		}, nil
+	}
+
+	return &pb.UserGetResponse{
+		Result: bool(resp.Result),
+		Err: "",
+		UserID: resp.UserID,
+		UserName: resp.UserName,
+		Sex: int32(resp.Sex),
+		Birthday: resp.Birthday,
+		City: resp.City,
+		District: resp.District,
+		Introduction: resp.Introduction,
+		Avatar: resp.Avatar,
+		RoleID: int32(resp.RoleID),
+	}, nil
+}

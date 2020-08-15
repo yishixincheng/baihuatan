@@ -9,6 +9,7 @@ import (
 // Service Default a service interface
 type Service interface {
 	Check(ctx context.Context, username, password string) (int64, error)
+	Get(ctx context.Context, userID int64) (*model.User, error)
 	HealthCheck() bool
 }
 
@@ -25,6 +26,17 @@ func (s UserService) Check(ctx context.Context, username string, password string
 		return 0, err
 	}
 	return res.UserID, nil
+}
+
+// Get -
+func (s UserService) Get(ctx context.Context, userID int64) (*model.User, error) {
+	userEntity := model.NewUserModel()
+	res, err   := userEntity.GetUser(userID)
+	if err != nil {
+		log.Printf("UserEntity.GetUser, err : %v", err)
+		return nil, err
+	}
+	return res, nil
 }
 
 // HealthCheck -

@@ -4,11 +4,11 @@ import (
 	localconf "baihuatan/ms-game-kpk/config"
 	endpts "baihuatan/ms-game-kpk/endpoint"
 	"baihuatan/ms-game-kpk/service"
+	"baihuatan/ms-game-kpk/setup"
 	"baihuatan/ms-game-kpk/transport"
+	"baihuatan/ms-game-kpk/ws"
 	"baihuatan/pkg/bootstrap"
-	conf "baihuatan/pkg/config"
 	register "baihuatan/pkg/discover"
-	"baihuatan/pkg/mysql"
 	"context"
 	"flag"
 	"fmt"
@@ -16,6 +16,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+
 	// "time"
 
 	"baihuatan/ms-game-kpk/middleware"
@@ -34,11 +35,15 @@ func main() {
 		servicePort = flag.String("service.port", bootstrap.HTTPConfig.Port, "service port")
 	//	grpcAddr    = flag.String("grpc", bootstrap.RPCConfig.Port, "gPRC listen address")
 	)
-
 	flag.Parse()
 
 	ctx := context.Background()
 	errChan := make(chan error)
+
+	// 链接mysql，redis
+	ws.InitWs()
+	setup.InitMysql()
+	setup.InitRedis()
 
 	fieldKeys := []string{"method"}
 	requestCount := kitprometheus.NewCounterFrom(prometheus.CounterOpts{
@@ -79,12 +84,6 @@ func main() {
 	// http server
 	go func() {
 		fmt.Println("HTTP Server start at port:" + *servicePort)
-		mysql.InitMysql(conf.MysqlConfig.Host,
-			conf.MysqlConfig.Port,
-			conf.MysqlConfig.User,
-			conf.MysqlConfig.Pwd,
-			conf.MysqlConfig.Db,
-		)
 		register.Register()
 		handler := r
 		errChan <- http.ListenAndServe(":" + *servicePort, handler)

@@ -16,11 +16,12 @@ import (
 )
 
 var (
+	// ErrorBadRequest -
 	ErrorBadRequest = errors.New("invalid request parameter")
 )
 
-// MakeHttpHandler make http handler use mux
-func MakeHttpHandler(ctx context.Context, endpoints endpts.UserEndpoints, zipkinTracer *zipkin.Tracer, logger log.Logger) http.Handler {
+// MakeHTTPHandler make http handler use mux
+func MakeHTTPHandler(ctx context.Context, endpoints endpts.UserEndpoints, zipkinTracer *zipkin.Tracer, logger log.Logger) http.Handler {
 	r := mux.NewRouter()
 	zipkinServer := kitzipkin.HTTPServerTrace(zipkinTracer, kitzipkin.Name("http-transport"))
 

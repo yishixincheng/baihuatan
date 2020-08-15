@@ -7,6 +7,7 @@ option go_package = "/pb";
 
 service UserService{
     rpc Check(UserRequest) returns (UserResponse){}
+    rpc Get(UserGetRequest) returns (UserGetResponse){}
 }
 
 message UserRequest {
@@ -18,4 +19,24 @@ message UserResponse {
     bool result  = 1;
     int64 userID = 2;
     string err   = 3;
+}
+
+// 通过UserID获取用户
+message UserGetRequest {
+    int64  userID = 1;
+}
+
+// 返回用户信息
+message UserGetResponse {
+    bool      result    = 1;
+    string    err       = 2;
+    int64     userID    = 3;
+    string    userName  = 4;
+    string    birthday  = 5;
+    int32     sex       = 6;
+    string    avatar    = 7;
+    string    city      = 8;
+    string    district  = 9;
+    string    introduction = 10;
+    int32     roleID    = 11;
 }

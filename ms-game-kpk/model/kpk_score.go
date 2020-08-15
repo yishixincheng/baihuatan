@@ -9,6 +9,8 @@ import (
 type KpkScore struct {
 	UserID         int64  `json:"user_id"`   // 用户ID
 	Score          int64  `json:"score"`     // 积分值
+	PetID          int64  `json:"pet_id"`    // 宠物ID
+	RoadID         int64  `json:"road_id"`   // 跑道ID
 	UpdateTs       string  `json:"update_ts"` // 更新时间
 }
 
@@ -63,4 +65,10 @@ func (p *KpkScoreModel) GetKpkScore(userID int64) (*KpkScore, error) {
 		Score: data["score"].(int64),
 		UpdateTs: data["update_ts"].(string),
 	}, nil
+}
+
+// KpkUser -用户信息
+type KpkUser struct{
+	KpkScore
+	
 }

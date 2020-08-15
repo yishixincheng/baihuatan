@@ -7,6 +7,7 @@ import (
 	"baihuatan/pkg/discover"
 	"baihuatan/pkg/loadbalance"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -147,7 +148,13 @@ func preFilter(r *http.Request) bool {
 	if remoteErr != nil || resp == nil {
 		return false
 	}
-
+	if !resp.IsValidToken {
+		return false
+	}
+	// 解析到用户设置用户头
+	user, _ := json.Marshal(resp.UserDetails)
+	r.Header.Set("Bhtuser", string(user[:]))
+	
 	return true
 }
 
