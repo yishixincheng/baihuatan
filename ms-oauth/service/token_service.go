@@ -19,8 +19,6 @@ var (
 	ErrNotSupportOperation = errors.New("no support operation")
 	// ErrNotEmptyUsernameAndPasswordRequest -
 	ErrNotEmptyUsernameAndPasswordRequest = errors.New("username or password must required")
-	// ErrInvalidUsernameAndPasswordRequest -
-	// ErrInvalidUsernameAndPasswordRequest = errors.New("invalid username, password")
 	// ErrInvalidTokenRequest -
 	ErrInvalidTokenRequest = errors.New("invalid token")
 	// ErrExpiredToken -
