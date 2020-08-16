@@ -36,7 +36,7 @@ func MakeHTTPHandler(ctx context.Context, endpoints endpts.KpkEndpoints, zipkinT
 
 	// 启动websocket长连接
 	r.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		ws.ServeWs(ws.RoomM, w, r)
+		ws.ServeWs(ctx, ws.RoomM, w, r)
 	})
 
 	r.Methods("GET").Path("/health").Handler(kithttp.NewServer(

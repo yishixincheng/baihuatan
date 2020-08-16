@@ -1,6 +1,13 @@
 package ws
 
-import "sync"
+import (
+	"baihuatan/api/oauth/pb"
+	"encoding/json"
+	"baihuatan/ms-game-kpk/model"
+	"fmt"
+	"sync"
+	"context"
+)
 
 // Room - 房间结构体
 type Room struct {
@@ -29,11 +36,13 @@ func (p *RoomManager) MatchingRoom() {
 }
 
 // GetKpkUser - 获取登录者信息
-func (p *RoomManager) GetKpkUser(userToken string) {
+func (p *RoomManager) GetKpkUser(ctx context.Context, userToken string) (*model.KpkUser, error) {
+	var userDetail = pb.UserDetails{}
+	if err := json.Unmarshal([]byte(userToken), &userDetail); err != nil {
+		fmt.Println("err:", err);
+		return nil, err
+	}
 
+	return model.GetKpkUserByUID(ctx, userDetail.UserID)
 }
 
-// GetKpkUserByUID - 
-func (p *RoomManager) GetKpkUserByUID(UID int64) {
-
-}

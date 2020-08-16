@@ -1,10 +1,13 @@
 package ws
 
 import (
+	"baihuatan/ms-game-kpk/model"
 	"bytes"
+	"context"
 	"log"
 	"net/http"
 	"time"
+
 	"github.com/gorilla/websocket"
 )
 
@@ -34,7 +37,7 @@ var upgrader = websocket.Upgrader{
 
 // Client is a middleman between the websocket connection and the hub.
 type Client struct {
-	hub *Hub
+	user *model.KpkUser
 	// The websocket connection.
 	conn *websocket.Conn
 
@@ -126,22 +129,25 @@ func (c *Client) writePump() {
 }
 
 // ServeWs handles websocket requests from the peer.
-func ServeWs(roomM *RoomManager, w http.ResponseWriter, r *http.Request) {
-
+func ServeWs(ctx context.Context, roomM *RoomManager, w http.ResponseWriter, r *http.Request) {
 	// 获取用户信息
-	roomM.GetKpkUser(r.Header.Get("Bhtuser"))
-	
+	user, err := roomM.GetKpkUser(ctx, r.Header.Get("Bhtuser"))
+	if err != nil {
+		log.Println("getUserFile:", err)
+		return
+	}
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	// 获取用户信息
+	// 构建链接客户端
 	client := &Client{
-		hub: hub,
+		user: user,
 		conn: conn,
 		send: make(chan []byte, 256),
 	}
+
 	client.hub.register <- client
 
 	go client.writePump()
