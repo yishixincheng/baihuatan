@@ -2,7 +2,7 @@ package transport
 
 import (
 	"context"
-	"baihuatan/pb"
+	"baihuatan/api/user/pb"
 	"errors"
 	endpts "baihuatan/ms-user/endpoint"
 )

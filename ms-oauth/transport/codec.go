@@ -3,7 +3,7 @@ package transport
 import (
 	endpts "baihuatan/ms-oauth/endpoint"
 	"baihuatan/ms-oauth/model"
-	"baihuatan/pb"
+	"baihuatan/api/oauth/pb"
 	"context"
 )
 

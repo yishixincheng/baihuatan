@@ -2,8 +2,8 @@ package service
 
 import (
 	"baihuatan/ms-oauth/model"
-	"baihuatan/pb"
-	"baihuatan/pkg/client"
+	"baihuatan/api/user"
+	"baihuatan/api/user/pb"
 	"context"
 	"errors"
 	"fmt"
@@ -23,7 +23,7 @@ type UserDetailsService interface {
 
 // RemoteUserService struct
 type RemoteUserService struct {
-	userClient client.UserClient
+	userClient user.UserClient
 }
 
 // GetUserDetailByUsername 实现方法
@@ -49,7 +49,7 @@ func (service *RemoteUserService) GetUserDetailByUsername(ctx context.Context, u
 
 // NewRemoteUserDetailService 创建对象
 func NewRemoteUserDetailService() *RemoteUserService {
-	userClient, _ := client.NewUserClient("user", nil, nil)
+	userClient, _ := user.NewUserClient("user", nil, nil)
 	return &RemoteUserService{
 		userClient: userClient,
 	}

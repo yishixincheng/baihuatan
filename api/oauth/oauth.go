@@ -1,7 +1,8 @@
-package client
+package oauth
 
 import (
-	"baihuatan/pb"
+	"baihuatan/api"
+	"baihuatan/api/oauth/pb"
 	"baihuatan/pkg/discover"
 	"baihuatan/pkg/loadbalance"
 	"context"
@@ -16,7 +17,7 @@ type OAuthClient interface {
 
 // OAuthClientImpl 实现类
 type OAuthClientImpl struct {
-	manager		 ClientManager
+	manager		 api.ClientManager
 	serviceName  string
 	loadBalance  loadbalance.LoadBalance
 	tracer       opentracing.Tracer
@@ -37,15 +38,15 @@ func NewOAuthClient(serviceName string, lb loadbalance.LoadBalance, tracer opent
 		serviceName = "oauth"
 	}
 	if lb == nil {
-		lb = defaultLoadBalance
+		lb = api.DefaultLoadBalance
 	}
 
 	return &OAuthClientImpl{
-		manager: &DefaultClientManager{
-			serviceName: serviceName,
+		manager: &api.DefaultClientManager{
+			ServiceName: serviceName,
 			LoadBalance: lb,
-			discoveryClient: discover.ConsulService,
-			logger: discover.Logger,
+			DiscoveryClient: discover.ConsulService,
+			Logger: discover.Logger,
 		},
 		serviceName: serviceName,
 		loadBalance: lb,

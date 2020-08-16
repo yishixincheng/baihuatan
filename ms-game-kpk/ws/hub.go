@@ -1,13 +1,5 @@
 package ws
 
-import (
-	"log"
-	"github.com/gorilla/websocket"
-	"net/http"
-	"time"
-)
-
-
 // Hub maintains the set of active clients and broadcasts messages to the
 // clients.
 type Hub struct {

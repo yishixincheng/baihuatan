@@ -3,7 +3,7 @@ package transport
 import (
 	"context"
 	"github.com/go-kit/kit/transport/grpc"
-	"baihuatan/pb"
+	"baihuatan/api/user/pb"
 	endpts "baihuatan/ms-user/endpoint"
 )
 

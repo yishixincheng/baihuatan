@@ -5,7 +5,7 @@ import (
 	endpts "baihuatan/ms-user/endpoint"
 	"baihuatan/ms-user/service"
 	"baihuatan/ms-user/transport"
-	"baihuatan/pb"
+	"baihuatan/api/user/pb"
 	"baihuatan/pkg/bootstrap"
 	conf "baihuatan/pkg/config"
 	register "baihuatan/pkg/discover"

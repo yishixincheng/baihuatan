@@ -1,9 +1,9 @@
 syntax = "proto3";
 
 package pb;
-option go_package = "/pb";
+option go_package = "/api/user/pb";
 
-// protoc --go_out=plugins=grpc:. pb/user.proto
+// protoc --go_out=plugins=grpc:. api/user/pb/user.proto
 
 service UserService{
     rpc Check(UserRequest) returns (UserResponse){}

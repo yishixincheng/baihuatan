@@ -1,4 +1,4 @@
-package client
+package api
 
 // 客户端装饰器
 import (
@@ -27,7 +27,8 @@ var (
 	ErrRPCService = errors.New("no rpc service")
 )
 
-var defaultLoadBalance loadbalance.LoadBalance = &loadbalance.WeightRoundRobinLoadBalance{}
+// DefaultLoadBalance - 
+var DefaultLoadBalance loadbalance.LoadBalance = &loadbalance.WeightRoundRobinLoadBalance{}
 
 // ClientManager 客户端管理
 type ClientManager interface {
@@ -37,9 +38,9 @@ type ClientManager interface {
 
 // DefaultClientManager 客户端管理
 type DefaultClientManager struct {
-	serviceName       string
-	logger            *log.Logger
-	discoveryClient   discover.DiscoveryClient
+	ServiceName       string
+	Logger            *log.Logger
+	DiscoveryClient   discover.DiscoveryClient
 	LoadBalance       loadbalance.LoadBalance
 	after             []InvokerAfterFunc
 	before            []InvokerBeforeFunc
@@ -62,7 +63,7 @@ func (manager *DefaultClientManager) DecoratorInvoke(ctx context.Context, path s
 	}
 	
 	if err = hystrix.Do(hystrixName, func() error {
-		instances := manager.discoveryClient.DiscoverServices(manager.serviceName, manager.logger)
+		instances := manager.DiscoveryClient.DiscoverServices(manager.ServiceName, manager.Logger)
 		if instance, err := manager.LoadBalance.SelectService(instances); err == nil {
 			if instance.GrpcPort > 0 {
 				fmt.Println(instance.GrpcPort)

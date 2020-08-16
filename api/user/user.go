@@ -1,7 +1,8 @@
-package client
+package user
 
 import (
-	"baihuatan/pb"
+	"baihuatan/api"
+	"baihuatan/api/user/pb"
 	"baihuatan/pkg/discover"
 	"baihuatan/pkg/loadbalance"
 	"context"
@@ -21,7 +22,7 @@ type UserClientImpl struct {
 	/**
 	* 可以配置负载均衡策略，重试、等机制。也可以配置invokeAfter和invokerBefore
 	*/
-	manager       ClientManager
+	manager       api.ClientManager
 	serviceName   string
 	loadBlance    loadbalance.LoadBalance
 	tracer        opentracing.Tracer
@@ -53,15 +54,15 @@ func NewUserClient(serviceName string, lb loadbalance.LoadBalance, tracer opentr
 		serviceName = "user"
 	}
 	if lb == nil {
-		lb = defaultLoadBalance
+		lb = api.DefaultLoadBalance
 	}
 
 	return &UserClientImpl{
-		manager: &DefaultClientManager{
-			serviceName: serviceName,
+		manager: &api.DefaultClientManager{
+			ServiceName: serviceName,
 			LoadBalance: lb,
-			discoveryClient: discover.ConsulService,
-			logger: discover.Logger,
+			DiscoveryClient: discover.ConsulService,
+			Logger: discover.Logger,
 		},
 		serviceName: serviceName,
 		loadBlance: lb,

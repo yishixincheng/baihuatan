@@ -2,8 +2,8 @@ package route
 
 import (
 	"baihuatan/gateway/config"
-	"baihuatan/pb"
-	"baihuatan/pkg/client"
+	"baihuatan/api/oauth"
+	"baihuatan/api/oauth/pb"
 	"baihuatan/pkg/discover"
 	"baihuatan/pkg/loadbalance"
 	"context"
@@ -139,7 +139,7 @@ func preFilter(r *http.Request) bool {
 		fmt.Println("authorization is empty")
 		return false
 	}
-	oauthClient, _ := client.NewOAuthClient("oauth", nil, nil)
+	oauthClient, _ := oauth.NewOAuthClient("oauth", nil, nil)
 
 	resp, remoteErr := oauthClient.CheckToken(context.Background(), nil, &pb.CheckTokenRequest{
 		Token: authToken,
