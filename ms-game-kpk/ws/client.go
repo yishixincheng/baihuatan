@@ -141,6 +141,10 @@ func ServeWs(ctx context.Context, roomM *RoomManager, w http.ResponseWriter, r *
 		log.Println(err)
 		return
 	}
+
+	// 匹配房间
+	roomM.MatchingRoom(user.UserID)
+
 	// 构建链接客户端
 	client := &Client{
 		user: user,
