@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"math/rand"
 	"strconv"
 	"sync"
@@ -29,6 +28,7 @@ type KpkQuestion struct {
 // KpkQuestionEx 扩展信息
 type KpkQuestionEx struct {
 	RightOption  string   `gorose:"right_option" json:"right_option"`         // 正确选项
+	Annotation   string   `gorose:"annotation" json:"annotation"`             // 注释
 	AuthorID     int64    `gorose:"right_option" json:"author_id"`
 	CateID       int64    `gorose:"right_option" json:"cate_id"`
 	UpdateTs       string  `gorose:"right_option" json:"update_ts"` // 更新时间
@@ -94,6 +94,30 @@ func (p *KpkQuestionModel) Edit(kpkQuestion *KpkQuestionAll) (int64, error) {
 	}).Where("id", kpkQuestion.ID).Update()
 }
 
+// Del -
+func (p *KpkQuestionModel) Del(ID int64) (int64, error) {
+	conn := mysql.DB()
+	return conn.Table(p.getTableName()).Where("id", ID).Delete()
+}
+
+
+// GetQuestionList - 获取问题列表用于后台调用,直接从数据库读取
+func (p *KpkQuestionModel) GetQuestionList(keyword string, page, pageSize int64) ([]*KpkQuestionAll, error) {
+	// 从数据库中获取
+	conn := mysql.DB()
+
+	var questionList = []*KpkQuestionAll{}
+
+	err := conn.Table(&questionList).Order("update_ts desc").Offset(int(page)).Limit(int(pageSize)).Select()
+
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	return questionList, nil
+}
+
 var (
 	questionKey = "QuestionStore"
 )
@@ -143,6 +167,40 @@ func (p *KpkQuestionModel) GetQuestionListFromCache(num int64) ([]*KpkQuestion, 
 	return kpkQuestionList, nil
 }
 
+// GetQustionFromCache - 从缓存中获取某题的结果
+func (p *KpkQuestionModel) GetQustionFromCache(ID int64) (*KpkQuestionAll, error) {
+	redisConn := conf.Redis.RedisConn
+	kpkQuestionStr, err := redisConn.HGet(questionKey, strconv.Itoa(int(ID))).Result()
+
+	if err == redis.Nil {
+		// 不存在， 则读取数据库
+		conn := mysql.DB()
+		result, err := conn.Table(p.getTableName()).Where("id", ID).First()
+		
+		if err != nil {
+			return nil, err
+		}
+
+		return  &KpkQuestionAll{
+			KpkQuestion{
+				ID: result["id"].(int64),
+			},
+			KpkQuestionEx{
+				RightOption: result["right_option"].(string),
+				Annotation:  result["annotation"].(string),
+				CateID:      result["cate_id"].(int64),
+				UpdateTs:    result["update_ts"].(string),
+			},
+		}, nil
+	}
+	kpkQuestionAll := &KpkQuestionAll{}
+
+	if err := json.Unmarshal([]byte(kpkQuestionStr), kpkQuestionAll); err != nil {
+		return nil, err
+	}
+	return kpkQuestionAll, nil
+}
+
 // AutoFetchQuestionsToCache - 自动获取题目到缓存中，启动一个goroutine
 func (p *KpkQuestionModel) AutoFetchQuestionsToCache(num int64) {
 	p.Lock()
@@ -170,7 +228,7 @@ func (p *KpkQuestionModel) AutoFetchQuestionsToCache(num int64) {
 		 questionV[strconv.Itoa(i)] = string(jv)
 	}
 
-	// 设置到redis中
+	// 设置到redis中 
 	redisConn.HMSet(questionKey, questionV)
 
 	return

@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS `kpk_question` (
     `option_3`    VARCHAR(512) NOT NULL DEFAULT '' COMMENT '选项3',
     `option_4`    VARCHAR(512) NOT NULL DEFAULT '' COMMENT '选项4',
     `right_option` VARCHAR(8)  NOT NULL DEFAULT '' COMMENT '1,2,3,4',
+    `annotation`   VARCHAR(512) NOT NULL　DEFAULT '' COMMENT '注释',
     `author_id`    INT(10)     NOT NULL DEFAULT 0 COMMENT '作者',
     `cate_id`      INT(10)     NOT NULL DEFAULT 0 COMMENT '分类',
     `update_ts`   timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP  COMMENT '更新时间',
