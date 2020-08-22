@@ -4,6 +4,7 @@ import (
 	"baihuatan/ms-game-kpk/model"
 	"bytes"
 	"context"
+	"encoding/json"
 	"log"
 	"net/http"
 	"time"
@@ -68,8 +69,7 @@ func (c *Client) readPump() {
 		return nil
 	})
 	for {
-		//_, message, err := c.conn.ReadMessage()
-		_, _, err := c.conn.ReadMessage()
+		_, message, err := c.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Println("websocket.IsUnexpectedCloseError:", err)
@@ -77,14 +77,15 @@ func (c *Client) readPump() {
 			log.Println("websocket read message have err")
 			break
 		}
-		//message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		//c.hub.broadcast <- message
-		// if c.hub.OnMessage != nil {
-        //     if err := c.hub.OnMessage(message, c.hub); err != nil {
-        //         log.Println(err)
-        //         break
-        //     }
-        // }
+		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
+
+		// 读取消息交给处理中心处理
+		if c.OnMessage != nil {
+			if err := c.OnMessage(message); err != nil {
+				log.Println("onMessage Error", err)
+				break;
+			}
+		}
 	}
 }
 
@@ -118,10 +119,8 @@ func (c *Client) writePump() {
 			// Add queued chat messages to the current websocket message.
 			n := len(c.send)
 			for i := 0; i < n; i++ {
-				// w.Write(newline)
 				w.Write(<-c.send)
 			}
-
 			if err := w.Close(); err != nil {
 				return
 			}
@@ -132,6 +131,17 @@ func (c *Client) writePump() {
 			}
 		}
 	}
+}
+
+// OnMessage - 处理消息
+func (c *Client) OnMessage(message []byte) error {
+	data := map[string]interface{}{}
+	// 解析json
+	if err := json.Unmarshal(message, &data); err != nil {
+		// 不是json对象不搭理啥事不做
+		return nil
+	}
+	return dispatch(c, data)
 }
 
 // ServeWs handles websocket requests from the peer.
@@ -163,8 +173,7 @@ func ServeWs(ctx context.Context, roomM *RoomManager, w http.ResponseWriter, r *
 		roomM.RemoveClientFromRoom(client)
 	}
 
-	room.listen()
-
+	go room.listen()
 	go client.writePump()
 	go client.readPump()
 }

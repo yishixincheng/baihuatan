@@ -172,6 +172,7 @@ func (p *RoomManager) RemoveClientFromRoom(client *Client) {
 			// 移除一个
 			room.ClientList = append(room.ClientList[:k], room.ClientList[k+1:]...)
 			room.ClientNum --
+			close(client.send) //关闭通道
 			client.conn.Close()
 			break;
 		}
@@ -179,6 +180,7 @@ func (p *RoomManager) RemoveClientFromRoom(client *Client) {
 
 	// 没有客户端则移除Room
 	if room.ClientNum == 0 {
+		close(room.broadcasts)
 		delete(p.RoomList, roomID)
 	}
 	return
