@@ -15,11 +15,11 @@ import (
 
 // KpkScore 用户PK游戏积分
 type KpkScore struct {
-	UserID         int64  `json:"user_id"`   // 用户ID
-	Score          int64  `json:"score"`     // 积分值
-	PetID          int64  `json:"pet_id"`    // 宠物ID
-	RoadID         int64  `json:"road_id"`   // 跑道ID
-	UpdateTs       string  `json:"update_ts"` // 更新时间
+	UserID         int64  `gorose:"user_id" json:"user_id"`   // 用户ID
+	Score          int64  `gorose:"score" json:"score"`     // 积分值
+	PetID          int64  `gorose:"pet_id" json:"pet_id"`    // 宠物ID
+	RoadID         int64  `gorose:"road_id" json:"road_id"`   // 跑道ID
+	UpdateTs       string  `gorose:"update_ts" json:"update_ts"` // 更新时间
 }
 
 // TableName -
@@ -80,13 +80,13 @@ func (p *KpkScoreModel) GetKpkScore(userID int64) (*KpkScore, error) {
 // KpkUser -用户信息
 type KpkUser struct{
 	KpkScore
-	UserName    string    `json:"user_name"`
-	Sex         int32     `json:"sex"`
-	Avatar      string    `json:"avatar"`
-	Birthday    string    `json:"birthday"`
-	City        string    `json:"city"`
-	District    string    `json:"district"`
-	RoleID      int32     `json:"role_id"`
+	UserName    string    `gorose:"user_name" json:"user_name"`
+	Sex         int32     `gorose:"sex" json:"sex"`
+	Avatar      string    `gorose:"avatar" json:"avatar"`
+	Birthday    string    `gorose:"birthday" json:"birthday"`
+	City        string    `gorose:"city" json:"city"`
+	District    string    `gorose:"district" json:"district"`
+	RoleID      int32     `gorose:"role_id" json:"role_id"`
 }
 
 

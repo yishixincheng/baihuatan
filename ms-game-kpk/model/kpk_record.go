@@ -9,15 +9,15 @@ import (
 
 // KpkRecord 用户PK积分记录
 type KpkRecord struct {
-	ID           int64    `json:"id"`   // ID
-	UserID       int64    `json:"user_id"`   // 用户ID
-	Score        int64    `json:"score"`     // 用户获得积分
-	HouseID      string   `json:"house_id"`  // 房间id
-	Ranking      int64    `json:"ranking"`   // 名次
-	QuestionCount  int64  `json:"question_count"` // 题目数量
-	AnswerCount    int64  `json:"answer_count"`   // 回答数量
-	AnswerCorrectCount int64 `json:"answer_correct_count"` // 回答正确的数量
-	UpdateTs       string  `json:"update_ts"` // 更新时间
+	ID           int64    `gorose:"id" json:"id"`   // ID
+	UserID       int64    `gorose:"user_id" json:"user_id"`   // 用户ID
+	Score        int64    `gorose:"score" json:"score"`     // 用户获得积分
+	HouseID      string   `gorose:"house_id" json:"house_id"`  // 房间id
+	Ranking      int64    `gorose:"ranking" json:"ranking"`   // 名次
+	QuestionCount  int64  `gorose:"question_count" json:"question_count"` // 题目数量
+	AnswerCount    int64  `gorose:"answer_count" json:"answer_count"`   // 回答数量
+	AnswerCorrectCount int64 `gorose:"answer_correct_count" json:"answer_correct_count"` // 回答正确的数量
+	UpdateTs       string  `gorose:"update_ts" json:"update_ts"` // 更新时间
 }
 
 // TableName -

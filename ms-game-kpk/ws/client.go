@@ -41,6 +41,9 @@ type Client struct {
 	// The websocket connection.
 	conn *websocket.Conn
 
+	// 几人赛
+	personNum int64
+	
 	// 发送通道
 	send chan []byte
 }
@@ -142,15 +145,16 @@ func ServeWs(ctx context.Context, roomM *RoomManager, w http.ResponseWriter, r *
 		return
 	}
 
-	// 匹配房间
-	roomM.MatchingRoom(user.UserID)
-
 	// 构建链接客户端
 	client := &Client{
 		user: user,
 		conn: conn,
 		send: make(chan []byte, 256),
 	}
+	// 匹配房间
+	roomM.MatchingRoom(client)
+
+
 
 	client.hub.register <- client
 
