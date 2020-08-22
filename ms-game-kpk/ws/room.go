@@ -33,6 +33,25 @@ type Room struct {
 	CreateTime     time.Time    `json:"create_time"`    // 创建时间
 	QuestionList   []*model.KpkQuestion  `json:"-"`     // 忽略
 	Status         int64        `json:"status"`         // 状态，0未开始，1人满待开始，2开始
+	// Inbound message from the clients.
+	broadcasts     chan []byte      `json:"-"`
+	mutex          sync.Mutex       `json:"-"`
+}
+
+// listen 监听消息
+func (p *Room) listen() {
+	for {
+		select {
+		case message := <-p.broadcasts:
+			for _, client := range p.ClientList {
+				select {
+				case client.send <- message:
+				default:
+					//不阻塞，执行下一次循环
+				}
+			}		
+		}
+	}
 }
 
 // RoomManager 房间管理者
@@ -54,9 +73,10 @@ func (p *RoomManager) CreateRoom(client *Client) (*Room, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	roomID := RoomIDType(uuid.NewV4().String())
+	client.roomID = roomID
 	room := &Room{
-		RoomID: RoomIDType(uuid.NewV4().String()),
+		RoomID: roomID,
 		OwnerUID: client.user.UserID,
 		ClientList: []*Client{client},
 		ClientNum: 1,
@@ -102,36 +122,66 @@ func (p *RoomManager) MatchingRoom(client *Client) (*Room, error) {
 	if err != nil {
 		return nil, err
 	}
-	if room, ok := p.RoomList[roomObj.RoomID]; !ok {
+	room, ok := p.RoomList[roomObj.RoomID]; 
+	if !ok {
 		return nil, fmt.Errorf("房间ID：%v 不存在", roomObj.RoomID)
-	} else {
-		// 找到房间
-		if room.ClientNum >= room.ClientMaxNum {
-			return nil, fmt.Errorf("房间ID：%v 已满", roomObj.RoomID)
-		}
-		room.ClientNum ++
-		room.ClientList = append(room.ClientList, client)
+	} 
+	// 找到房间
+	if room.ClientNum >= room.ClientMaxNum {
+		return nil, fmt.Errorf("房间ID：%v 已满", roomObj.RoomID)
+	}
+	client.roomID = roomObj.RoomID
+	room.ClientNum ++
+	room.ClientList = append(room.ClientList, client)
 
-		if room.ClientNum >= room.ClientMaxNum {
-			// 房间已满
-			room.Status = 1   // 人满待开始
-
-			return room, nil
-		}
-
-		// 未满队尾插入
-		roomJSONStr, err := json.Marshal(room)
-		if err != nil {
-			return nil, err
-		}
-
-		// 塞入缓存中
-		if err = redisConn.RPush(roomQueueKey, roomJSONStr).Err(); err != nil {
-			return nil, err
-		}
+	if room.ClientNum >= room.ClientMaxNum {
+		// 房间已满
+		room.Status = 1   // 人满待开始
 
 		return room, nil
 	}
+
+	// 未满队尾插入
+	roomJSONStr, err := json.Marshal(room)
+	if err != nil {
+		return nil, err
+	}
+
+	// 塞入缓存中
+	if err = redisConn.RPush(roomQueueKey, roomJSONStr).Err(); err != nil {
+		return nil, err
+	}
+
+	return room, nil
+}
+
+// RemoveClientFromRoom - 移除客户端从房间中
+func (p *RoomManager) RemoveClientFromRoom(client *Client) {
+	roomID := client.roomID
+	if roomID == "" {
+		return
+	}
+	room, ok := p.RoomList[roomID]
+	if !ok {
+		return
+	}
+	room.mutex.Lock()
+	defer room.mutex.Unlock()
+	for k, clientNode := range room.ClientList {
+		if client.conn == clientNode.conn {
+			// 移除一个
+			room.ClientList = append(room.ClientList[:k], room.ClientList[k+1:]...)
+			room.ClientNum --
+			client.conn.Close()
+			break;
+		}
+	}
+
+	// 没有客户端则移除Room
+	if room.ClientNum == 0 {
+		delete(p.RoomList, roomID)
+	}
+	return
 }
 
 // GetKpkUser - 获取登录者信息
@@ -144,4 +194,3 @@ func (p *RoomManager) GetKpkUser(ctx context.Context, userToken string) (*model.
 
 	return model.GetKpkUserByUID(ctx, userDetail.UserID)
 }
-

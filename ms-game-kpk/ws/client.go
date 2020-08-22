@@ -44,6 +44,9 @@ type Client struct {
 	// 几人赛
 	personNum int64
 	
+	// 房间ID
+	roomID  RoomIDType
+
 	// 发送通道
 	send chan []byte
 }
@@ -149,14 +152,18 @@ func ServeWs(ctx context.Context, roomM *RoomManager, w http.ResponseWriter, r *
 	client := &Client{
 		user: user,
 		conn: conn,
+		personNum: 4,
 		send: make(chan []byte, 256),
 	}
 	// 匹配房间
-	roomM.MatchingRoom(client)
+	room, err := roomM.MatchingRoom(client)
 
+	if err != nil {
+		// 移除客户端
+		roomM.RemoveClientFromRoom(client)
+	}
 
-
-	client.hub.register <- client
+	room.listen()
 
 	go client.writePump()
 	go client.readPump()
