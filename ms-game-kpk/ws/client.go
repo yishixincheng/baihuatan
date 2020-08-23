@@ -45,8 +45,8 @@ type Client struct {
 	// 几人赛
 	personNum int64
 	
-	// 房间ID
-	roomID  RoomIDType
+	// Room指针
+	room   *Room
 
 	// 发送通道
 	send chan []byte

@@ -74,7 +74,6 @@ func (p *RoomManager) CreateRoom(client *Client) (*Room, error) {
 		return nil, err
 	}
 	roomID := RoomIDType(uuid.NewV4().String())
-	client.roomID = roomID
 	room := &Room{
 		RoomID: roomID,
 		OwnerUID: client.user.UserID,
@@ -85,7 +84,7 @@ func (p *RoomManager) CreateRoom(client *Client) (*Room, error) {
 		CreateTime: time.Now(),
 		Status: 0,
 	}
-
+	client.room = room
 	p.RoomList[room.RoomID] = room
 	return room, nil
 }
@@ -130,7 +129,7 @@ func (p *RoomManager) MatchingRoom(client *Client) (*Room, error) {
 	if room.ClientNum >= room.ClientMaxNum {
 		return nil, fmt.Errorf("房间ID：%v 已满", roomObj.RoomID)
 	}
-	client.roomID = roomObj.RoomID
+	client.room   = room
 	room.ClientNum ++
 	room.ClientList = append(room.ClientList, client)
 
@@ -157,7 +156,7 @@ func (p *RoomManager) MatchingRoom(client *Client) (*Room, error) {
 
 // RemoveClientFromRoom - 移除客户端从房间中
 func (p *RoomManager) RemoveClientFromRoom(client *Client) {
-	roomID := client.roomID
+	roomID := client.room.RoomID
 	if roomID == "" {
 		return
 	}
