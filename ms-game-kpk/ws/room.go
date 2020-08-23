@@ -34,8 +34,8 @@ type Room struct {
 	QuestionList   []*model.KpkQuestion  `json:"-"`     // 忽略
 	Status         int64        `json:"status"`         // 状态，0未开始，1人满待开始，2开始
 	// Inbound message from the clients.
-	broadcasts     chan []byte      `json:"-"`
-	mutex          sync.Mutex       `json:"-"`
+	broadcasts     chan []byte      
+	mutex          sync.Mutex      
 }
 
 // listen 监听消息

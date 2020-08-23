@@ -44,7 +44,7 @@ type Client struct {
 
 	// 几人赛
 	personNum int64
-	
+
 	// Room指针
 	room   *Room
 
@@ -80,12 +80,17 @@ func (c *Client) readPump() {
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
 
 		// 读取消息交给处理中心处理
-		if c.OnMessage != nil {
-			if err := c.OnMessage(message); err != nil {
-				log.Println("onMessage Error", err)
-				break;
-			}
+		messageJSONData := make(map[string]interface{})
+		if err := json.Unmarshal(message, &messageJSONData); err != nil {
+			// 无效消息
+			log.Println("invalid message parameter: ", string(message))
+			break;
 		}
+		if err := dispatch(c, messageJSONData); err != nil {
+			log.Println("onMessage Error", err)
+			break;
+		}
+
 	}
 }
 
@@ -177,4 +182,3 @@ func ServeWs(ctx context.Context, roomM *RoomManager, w http.ResponseWriter, r *
 	go client.writePump()
 	go client.readPump()
 }
-
