@@ -54,6 +54,28 @@ func (p *Room) listen() {
 	}
 }
 
+// sendMsgToClient - 发送消息到客户端
+func (p *Room) sendMsgToClient(client *Client, message Message) {
+	messageByte, err := EncodeMessage(message)
+	if err != nil {
+		fmt.Println("invalid message:", err)
+		return
+	}
+	// 塞入通道
+	client.send <- messageByte
+}
+
+// broadcast -- 广播到所有的客户端
+func (p *Room) broadcast(message Message) {
+	messageByte, err := EncodeMessage(message)
+	if err != nil {
+		fmt.Println("invalid message:", err)
+		return
+	}
+	// 塞入通道
+	p.broadcasts <- messageByte
+}
+
 // RoomManager 房间管理者
 type RoomManager struct {
 	MaxRoomCount       int  // 支持最多的房间数

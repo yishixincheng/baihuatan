@@ -36,6 +36,28 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
+// Message 消息体
+type Message map[string]interface{}
+
+// EncodeMessage -
+func EncodeMessage(m Message) ([]byte, error) {
+	return json.Marshal(m)
+}
+
+// DecodeMessage - 
+func DecodeMessage(b []byte) (Message, error) {
+	m := Message{}
+	err := json.Unmarshal(b, &m)
+	return m, err
+}
+
+//Indicator 答题过程指标
+type Indicator struct {
+	cursor      int      // 当前用户答题游标
+	right       int      // 答正确多少题
+	count       int      // 答了多少题 
+}
+
 // Client is a middleman between the websocket connection and the hub.
 type Client struct {
 	user *model.KpkUser
@@ -47,6 +69,9 @@ type Client struct {
 
 	// Room指针
 	room   *Room
+
+	// 答题指标
+	indicator *Indicator
 
 	// 发送通道
 	send chan []byte
@@ -80,7 +105,7 @@ func (c *Client) readPump() {
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
 
 		// 读取消息交给处理中心处理
-		messageJSONData := make(map[string]interface{})
+		messageJSONData := make(Message)
 		if err := json.Unmarshal(message, &messageJSONData); err != nil {
 			// 无效消息
 			log.Println("invalid message parameter: ", string(message))
@@ -138,17 +163,6 @@ func (c *Client) writePump() {
 	}
 }
 
-// OnMessage - 处理消息
-func (c *Client) OnMessage(message []byte) error {
-	data := map[string]interface{}{}
-	// 解析json
-	if err := json.Unmarshal(message, &data); err != nil {
-		// 不是json对象不搭理啥事不做
-		return nil
-	}
-	return dispatch(c, data)
-}
-
 // ServeWs handles websocket requests from the peer.
 func ServeWs(ctx context.Context, roomM *RoomManager, w http.ResponseWriter, r *http.Request) {
 	// 获取用户信息
@@ -168,6 +182,11 @@ func ServeWs(ctx context.Context, roomM *RoomManager, w http.ResponseWriter, r *
 		user: user,
 		conn: conn,
 		personNum: 4,
+		indicator: &Indicator{
+			count: 0,
+			cursor: 0,
+			right: 0,
+		},
 		send: make(chan []byte, 256),
 	}
 	// 匹配房间
