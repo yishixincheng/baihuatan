@@ -18,6 +18,7 @@ import (
 var (
 	// redis队列键名
 	roomQueueKey = "bht_room_queue_key"
+
 )
 
 // RoomIDType 房间ID
@@ -33,6 +34,8 @@ type Room struct {
 	CreateTime     time.Time    `json:"create_time"`    // 创建时间
 	QuestionList   []*model.KpkQuestion  `json:"-"`     // 忽略
 	Status         int64        `json:"status"`         // 状态，0未开始，1人满待开始，2开始
+	QuestionNum    int        `json:"-" `             // 题库数量
+	WinPace        int        `json:"-"`              // 胜利的步数
 	// Inbound message from the clients.
 	broadcasts     chan []byte      
 	mutex          sync.Mutex      
@@ -96,6 +99,12 @@ func (p *RoomManager) CreateRoom(client *Client) (*Room, error) {
 		return nil, err
 	}
 	roomID := RoomIDType(uuid.NewV4().String())
+	winPace := 10
+	questionNum := len(qustionList)
+	if winPace > questionNum {
+		winPace = questionNum
+	}
+
 	room := &Room{
 		RoomID: roomID,
 		OwnerUID: client.user.UserID,
@@ -105,6 +114,8 @@ func (p *RoomManager) CreateRoom(client *Client) (*Room, error) {
 		QuestionList: qustionList,
 		CreateTime: time.Now(),
 		Status: 0,
+		WinPace: winPace,
+		QuestionNum: questionNum,
 	}
 	client.room = room
 	p.RoomList[room.RoomID] = room

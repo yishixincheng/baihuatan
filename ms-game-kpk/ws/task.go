@@ -4,8 +4,7 @@ import (
 	"baihuatan/ms-game-kpk/model"
 	"fmt"
 	"log"
-
-	"golang.org/x/text/cases"
+	"sort"
 )
 
 const (
@@ -47,6 +46,7 @@ func onStart(client *Client, params Message) error {
 		// 不是房主无法触发开始条件，发送消息
 		log.Println("非房主无法开始PK")
 		client.room.sendMsgToClient(client, Message{
+			"method" : "error",
 			"err" : errInvalidUser,
 			"msg" : "非房主无法开始PK",
 		})
@@ -55,7 +55,8 @@ func onStart(client *Client, params Message) error {
 	// 开始游戏，发送题目
 	client.room.Status = 2 //开始
 	client.room.broadcast(Message{
-		"err" : errNo, 
+		"method" : "start", 
+		"err" :  errNo,
 		"msg" : "开始PK",
 		"question": *client.room.QuestionList[client.indicator.cursor],
 	})
@@ -71,6 +72,7 @@ func onAnswer(client *Client, message Message) error {
 
 	if cursor > client.indicator.cursor || cursor > len(client.room.QuestionList) - 1 {
 		client.room.sendMsgToClient(client, Message{
+			"method" : "error",
 			"err" : errInvalidParameter,
 			"msg" : "cursor is invalid",
 		})
@@ -83,18 +85,42 @@ func onAnswer(client *Client, message Message) error {
 
 	if err != nil {
 		client.room.sendMsgToClient(client, Message{
+			"method": "error",
 			"err" : errDataLost,
 			"msg" : "quesion result is lost",
 		})
 		return nil
 	}
 
-	// 答题是否正确
-	if optionToChoice(result.RightOption) == choice {
-		// 正确
-		
+	rightChoice := optionToChoice(result.RightOption)
+	// 正确
+	client.room.sendMsgToClient(client, Message{
+		"method": "answerResult",
+		"choice"      : choice,
+		"cursor"      : cursor,
+		"rightChoice" : rightChoice,
+		"annotation"  : result.Annotation,
+	})
+
+	// 计算战果
+	client.indicator.count ++    // 答题总数
+	if rightChoice == choice {
+		// 争取答题总数
+		client.indicator.right ++
 	}
 
+	client.indicator.pace = 2 * client.indicator.right - client.indicator.count
+	if client.indicator.pace < 0 {
+		// 不能小于0
+		client.indicator.pace = 0
+	}
+
+	responseFightDynamic(client.room)
+
+	// 计算结果，率先答对10题，或者答完，则游戏结束计算战果
+	if (client.indicator.pace >= client.room.WinPace) && (client.indicator.count == client.room.QuestionNum) {
+		gameOverSummary(client.room)
+	}
 
 	return nil
 }
@@ -109,6 +135,95 @@ func onNextQuestion(client *Client, message Message) error {
 func onThrowProps(client *Client, message Message) error {
 
 	return nil
+}
+
+// 发送战斗动态
+func responseFightDynamic(room *Room) error {
+	message := Message{
+		"method" : "fightDynamic",
+		"roomID" : room.RoomID,
+		"status" : room.Status,
+	}
+
+	userList := []Message{
+	}
+
+	for _, client := range room.ClientList {
+		userList = append(userList, Message{
+			"userID" : client.user.UserID,
+			"userName" : client.user.UserName,
+			"pace"     : client.indicator.pace,
+			"right"    : client.indicator.right,
+			"count"    : client.indicator.count,
+		})
+	}
+	message["userList"] = userList
+
+	// 广播
+	room.broadcast(message)
+
+	return nil
+}
+
+// 游戏结束汇总, 计算排名，发送消息，并统计到数据库中
+func gameOverSummary(room *Room) {
+	room.Status = 3
+	message := Message{
+		"method" : "gameover",
+		"roomID" : room.RoomID,
+		"status" : room.Status,
+	}
+
+	// 求出1，2，3名，并计算获得积分值
+	userList := []Message{
+	}
+	for _, client := range room.ClientList {
+		userList = append(userList, Message{
+			"userID" : client.user.UserID,
+			"userName" : client.user.UserName,
+			"pace"     : client.indicator.pace,
+			"right"    : client.indicator.right,
+			"count"    : client.indicator.count,
+			"core"     : 0,
+		})
+	}
+
+	// 降序排序
+	sort.Slice(userList, func(i, j int ) bool {
+		return userList[i]["pace"].(int) > userList[i]["pace"].(int)
+	})
+
+	// 计算分值
+	if room.ClientNum > 2 {
+		userList[0]["core"] = 5
+		userList[1]["core"] = 2
+	} else {
+		userList[0]["core"] = 2
+	}
+	message["userList"] = userList
+
+	// 广播
+	room.broadcast(message)
+
+	// 记录到数据库中
+	kpkRecordModel := model.NewKpkRecordModel()
+
+	insertData := []map[string]interface{}{
+	}
+	
+	for i, user := range userList {
+		insertData = append(insertData, map[string]interface{}{
+			"userID" : user["userID"],
+			"roomID" : room.RoomID,
+			"score"  : user["score"],
+			"questionCount" : room.QuestionNum,
+			"answerCount" : user["count"],
+			"answerCorrectCount" : user["right"],
+			"ranking" : (i+1),
+		})
+	}
+	// 记录到表中
+	kpkRecordModel.BatchAdd(insertData)
 }
 
 // optionToChoice -

@@ -55,7 +55,8 @@ func DecodeMessage(b []byte) (Message, error) {
 type Indicator struct {
 	cursor      int      // 当前用户答题游标
 	right       int      // 答正确多少题
-	count       int      // 答了多少题 
+	count       int      // 答了多少题
+	pace        int      // 步伐，答对加1，答错减一，最低为0
 }
 
 // Client is a middleman between the websocket connection and the hub.

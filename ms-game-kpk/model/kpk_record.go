@@ -37,18 +37,24 @@ func NewKpkRecordModel() *KpkRecordModel {
 	}
 }
 
-// Add -
-func (p *KpkRecordModel) Add(userID, score, ranking, questionCount, answerCount, answerCorrectCount int64, houseID string) bool {
+// BatchAdd -
+func (p *KpkRecordModel) BatchAdd(data []map[string]interface{}) bool {
+	insertData := []map[string]interface{}{
+	}
+	for _, item := range data {
+		insertData = append(insertData, map[string]interface{}{
+			"user_id" : item["userID"],
+			"room_id" : item["roomID"],
+			"score"   : item["score"],
+			"question_count" : item["questionCount"],
+			"answer_count" : item["answerCount"],
+			"answer_correct_count" : item["answerCorrectCount"],
+			"ranking" : item["ranking"],
+		})
+	}
+
 	conn := mysql.DB()
-	_, err := conn.Table(&KpkRecord{}).Data(map[string]interface{}{
-		"user_id" : userID,
-		"score" : score,
-		"house_id" : houseID,
-		"ranking" : ranking,
-		"question_count" : questionCount,
-		"answer_count" : answerCount,
-		"answer_correct_count" : answerCorrectCount,
-	}).Insert()
+	_, err := conn.Table(&KpkRecord{}).Data(insertData).Insert()
 	
 	return err == nil
 }
