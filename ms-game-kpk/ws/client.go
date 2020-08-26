@@ -57,6 +57,7 @@ type Indicator struct {
 	right       int      // 答正确多少题
 	count       int      // 答了多少题
 	pace        int      // 步伐，答对加1，答错减一，最低为0
+	isAsk       bool     // 答题完成置真，置真的情况下方可以读取下一题
 }
 
 // Client is a middleman between the websocket connection and the hub.
@@ -187,6 +188,7 @@ func ServeWs(ctx context.Context, roomM *RoomManager, w http.ResponseWriter, r *
 			count: 0,
 			cursor: 0,
 			right: 0,
+			isAsk: false,
 		},
 		send: make(chan []byte, 256),
 	}

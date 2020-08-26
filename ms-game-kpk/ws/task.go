@@ -12,6 +12,7 @@ const (
 	errInvalidUser      = 1     // 非法用户
 	errInvalidParameter = 2     // 无效参数
 	errDataLost         = 3     // 数据丢失
+	errOther            = 9    // 其他错误
 )
 
 type methodFunc func(*Client, Message) error
@@ -59,6 +60,7 @@ func onStart(client *Client, params Message) error {
 		"err" :  errNo,
 		"msg" : "开始PK",
 		"question": *client.room.QuestionList[client.indicator.cursor],
+		"number" : client.indicator.cursor + 1, 
 	})
 
 	return nil
@@ -102,6 +104,8 @@ func onAnswer(client *Client, message Message) error {
 		"annotation"  : result.Annotation,
 	})
 
+	client.indicator.isAsk = true
+
 	// 计算战果
 	client.indicator.count ++    // 答题总数
 	if rightChoice == choice {
@@ -127,7 +131,36 @@ func onAnswer(client *Client, message Message) error {
 
 // onNextQuestion -- 下一题
 func onNextQuestion(client *Client, message Message) error {
+	if client.room.Status != 2 {
+		client.room.sendMsgToClient(client, Message{
+			"method": "error",
+			"err" : errOther,
+			"msg" : "PK游戏还未开始",
+		})
+		return nil
+	}
+	if !client.indicator.isAsk {
+		// 上一题没答复无法读取下一题
+		client.room.sendMsgToClient(client, Message{
+			"method": "error",
+			"err" : errOther,
+			"msg" : "请答完题再翻下一题",
+		})
+		return nil
+	}
 
+	// 游标移动
+	client.indicator.cursor ++
+	client.indicator.isAsk = false
+
+	client.room.broadcast(Message{
+		"method" : "newquestion", 
+		"err" :  errNo,
+		"msg" : "请答题",
+		"question": *client.room.QuestionList[client.indicator.cursor],
+		"number" : client.indicator.cursor + 1, 
+	})
+	
 	return nil
 }
 
@@ -205,9 +238,6 @@ func gameOverSummary(room *Room) {
 	// 广播
 	room.broadcast(message)
 
-	// 记录到数据库中
-	kpkRecordModel := model.NewKpkRecordModel()
-
 	insertData := []map[string]interface{}{
 	}
 	
@@ -223,7 +253,32 @@ func gameOverSummary(room *Room) {
 		})
 	}
 	// 记录到表中
+	kpkRecordModel := model.NewKpkRecordModel()
 	kpkRecordModel.BatchAdd(insertData)
+	kpkScoreModel := model.NewKpkScoreModel()
+	kpkScoreModel.BatchIncScore(insertData)
+}
+
+// 用户加入房间通知
+func userJoinNotify(client *Client) {
+	room := client.room
+	message := Message{
+		"method" : "userjoin",
+		"roomID" : room.RoomID,
+		"user" : Message{
+			"userID": client.user.UserID,
+			"userName": client.user.UserName,
+			"roadID": client.user.RoadID,
+			"petID": client.user.PetID,
+			"avatar": client.user.Avatar,
+			"sex": client.user.Sex,
+			"score": client.user.Score,
+			"rank": client.user.Rank,
+		},
+	}
+
+	// 广播
+	room.broadcast(message)
 }
 
 // optionToChoice -
@@ -240,3 +295,4 @@ func optionToChoice(option string) string {
 	}
 	return ""
 }
+

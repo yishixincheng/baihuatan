@@ -184,6 +184,9 @@ func (p *RoomManager) MatchingRoom(client *Client) (*Room, error) {
 		return nil, err
 	}
 
+	// 通知用户加入
+	userJoinNotify(client)
+
 	return room, nil
 }
 
