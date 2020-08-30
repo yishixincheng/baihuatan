@@ -1,15 +1,18 @@
 package service
 
 import (
+	"baihuatan/ms-oauth/model"
 	"context"
+	"encoding/json"
 	"errors"
-	"github.com/dgrijalva/jwt-go"
-	uuid "github.com/satori/go.uuid"
+	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"time"
-	"baihuatan/ms-oauth/model"
-	"fmt"
+
+	"github.com/dgrijalva/jwt-go"
+	uuid "github.com/satori/go.uuid"
 )
 
 var (
@@ -92,8 +95,16 @@ func (tokenGranter *UsernamePasswordTokenGranter) Grant(ctx context.Context, gra
 		return nil, ErrNotSupportGrantType
 	}
 	// 从请求体中获取用户名和密码
-	username := reader.FormValue("username")
-	password := reader.FormValue("password")
+	body, err := ioutil.ReadAll(reader.Body)
+	if err != nil {
+		return nil, ErrNotEmptyUsernameAndPasswordRequest
+	}
+	var paramKv = map[string]interface{}{}
+	if err := json.Unmarshal(body, &paramKv); err != nil {
+		return nil, ErrNotEmptyUsernameAndPasswordRequest
+	}
+	username := paramKv["username"].(string)
+	password := paramKv["password"].(string)
 
 	if username == "" || password == "" {
 		return nil, ErrNotEmptyUsernameAndPasswordRequest

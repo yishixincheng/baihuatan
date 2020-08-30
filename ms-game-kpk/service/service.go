@@ -1,5 +1,9 @@
 package service 
 
+import (
+	"baihuatan/ms-game-kpk/model"
+)
+
 // import (
 // 	"context"
 // 	"log"
@@ -8,6 +12,7 @@ package service
 // Service -
 type Service interface {
 	HealthCheck() bool
+	AutoFetchQuestionsToCache(int64)
 }
 
 // KpkService -
@@ -19,6 +24,11 @@ func (o KpkService) HealthCheck() bool {
 	return true
 }
 
+// AutoFetchQuestionsToCache - 
+func (o KpkService) AutoFetchQuestionsToCache(num int64) {
+	kpkModel := model.NewKpkQuestionModel()
+	kpkModel.AutoFetchQuestionsToCache(num)
+}
 
 // ServiceMiddleware define service middleware
 type ServiceMiddleware func(Service) Service

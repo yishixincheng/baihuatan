@@ -15,12 +15,12 @@ import (
 
 // KpkScore 用户PK游戏积分
 type KpkScore struct {
-	UserID         int64  `gorose:"user_id" json:"user_id"`   // 用户ID
-	Score          int64  `gorose:"score" json:"score"`     // 积分值
-	PetID          int64  `gorose:"pet_id" json:"pet_id"`    // 宠物ID
-	RoadID         int64  `gorose:"road_id" json:"road_id"`   // 跑道ID
-	UpdateTs       string  `gorose:"update_ts" json:"update_ts"` // 更新时间
-	Rank           string  `json:"rank"`                         //等级
+	UserID         int64      `gorose:"user_id" json:"user_id"`   // 用户ID
+	Score          int64      `gorose:"score" json:"score"`     // 积分值
+	PetID          int64      `gorose:"pet_id" json:"pet_id"`    // 宠物ID
+	RoadID         int64      `gorose:"road_id" json:"road_id"`   // 跑道ID
+	UpdateTs       time.Time  `gorose:"update_ts" json:"update_ts"` // 更新时间
+	Rank           string     `json:"rank"`                         //等级
 }
 
 // TableName -
@@ -63,7 +63,7 @@ func (p *KpkScoreModel) GetKpkScore(userID int64) (*KpkScore, error) {
 	conn := mysql.DB()
 	sql := conn.Table(&KpkScore{})
 	data, err := sql.Where("user_id", userID).First()
-	if err != nil {
+	if err != nil || data == nil {
 		log.Printf("Error: %v", err)
 		// 记录不存在则创建
 		_, err = sql.Data(map[string]interface{}{"user_id": userID, "score": 0}).Insert()
@@ -83,7 +83,7 @@ func (p *KpkScoreModel) GetKpkScore(userID int64) (*KpkScore, error) {
 		Score: data["score"].(int64),
 		PetID: data["pet_id"].(int64),
 		RoadID: data["road_id"].(int64),
-		UpdateTs: data["update_ts"].(string),
+		UpdateTs: data["update_ts"].(time.Time),
 		Rank: GetRankByScore(data["score"].(int64)),
 	}, nil
 }

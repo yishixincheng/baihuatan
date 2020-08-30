@@ -17,7 +17,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	// "time"
+	"time"
 
 	"baihuatan/ms-game-kpk/middleware"
 	// "baihuatan/pkg/ratelimiter"
@@ -110,6 +110,14 @@ func main() {
 	// 	pb.RegisterUserServiceServer(gRPCServer, handler)
 	// 	errChan <- gRPCServer.Serve(listener)
 	// }()
+
+	// 死循环自动刷题到缓存中
+	go func() {
+		for {
+			svc.AutoFetchQuestionsToCache(1000)
+			time.Sleep(time.Duration(10) * time.Second)
+		}
+	}()
 
 	go func() {
 		c := make(chan os.Signal, 1)

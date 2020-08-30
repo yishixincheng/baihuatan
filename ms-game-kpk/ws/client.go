@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -138,14 +139,17 @@ func (c *Client) writePump() {
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
 				// The hub closed the channel
+				fmt.Println("setdealline")
 				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
 			
 			w, err := c.conn.NextWriter(websocket.TextMessage)
 			if err != nil {
+				fmt.Println("nextWrite:", err)
 				return
 			}
+			fmt.Println("发送给客户端消息", message)
 			w.Write(message)
 
 			// Add queued chat messages to the current websocket message.
@@ -159,6 +163,7 @@ func (c *Client) writePump() {
 		case <-ticker.C:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				fmt.Println("setdealline:", err)
 				return
 			}
 		}
@@ -168,12 +173,17 @@ func (c *Client) writePump() {
 // ServeWs handles websocket requests from the peer.
 func ServeWs(ctx context.Context, roomM *RoomManager, w http.ResponseWriter, r *http.Request) {
 	// 获取用户信息
+	fmt.Println(r.Header.Get("Bhtuser"));
+	joinRoomType := r.URL.Query().Get("joinroomtype") // 房间类型
+	fmt.Println("房间类型", joinRoomType)
 	user, err := roomM.GetKpkUser(ctx, r.Header.Get("Bhtuser"))
 	if err != nil {
-		log.Println("getUserFile:", err)
+		log.Println("getUser:", err)
 		return
 	}
-	conn, err := upgrader.Upgrade(w, r, nil)
+	conn, err := upgrader.Upgrade(w, r, http.Header{
+		"Sec-Websocket-Protocol": []string{r.Header.Get("Sec-WebSocket-Protocol")},
+	})
 	if err != nil {
 		log.Println(err)
 		return
@@ -183,7 +193,12 @@ func ServeWs(ctx context.Context, roomM *RoomManager, w http.ResponseWriter, r *
 	client := &Client{
 		user: user,
 		conn: conn,
-		personNum: 4,
+		personNum: func() int64 {
+			if joinRoomType == "2" {
+				return 4
+			}
+			return 2
+		}(),
 		indicator: &Indicator{
 			count: 0,
 			cursor: 0,
@@ -195,8 +210,11 @@ func ServeWs(ctx context.Context, roomM *RoomManager, w http.ResponseWriter, r *
 	// 匹配房间
 	room, err := roomM.MatchingRoom(client)
 
+	fmt.Println(*room)
+
 	if err != nil {
 		// 移除客户端
+		fmt.Println(err)
 		roomM.RemoveClientFromRoom(client)
 	}
 

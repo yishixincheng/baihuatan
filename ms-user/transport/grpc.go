@@ -5,6 +5,7 @@ import (
 	"github.com/go-kit/kit/transport/grpc"
 	"baihuatan/api/user/pb"
 	endpts "baihuatan/ms-user/endpoint"
+	"fmt"
 )
 
 type grpcServer struct {
@@ -23,6 +24,7 @@ func (s *grpcServer) Check(ctx context.Context, r *pb.UserRequest) (*pb.UserResp
 func(s *grpcServer) Get(ctx context.Context, r *pb.UserGetRequest) (*pb.UserGetResponse, error) {
 	_, resp, err := s.get.ServeGRPC(ctx, r)
 	if err != nil {
+		fmt.Println("Get Error")
 		return nil, err
 	}
 	return resp.(*pb.UserGetResponse), nil

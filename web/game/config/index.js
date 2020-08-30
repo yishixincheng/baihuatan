@@ -10,7 +10,16 @@ module.exports = {
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
-    proxyTable: {},
+    proxyTable: {
+      '/api':{
+          target:'http://192.168.43.94:9090/',//API服务器地址
+          ws:true,
+          changeOrigin:true, //虚拟站点需要更管origin
+          pathRewrite:{    //重写路径 比如'/api/aaa/ccc'重新为'/aaa/ccc'
+              '^/api':''
+          }
+      }
+    },
 
     // Various Dev Server settings
     host: 'localhost', // can be overwritten by process.env.HOST

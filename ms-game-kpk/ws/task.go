@@ -262,20 +262,30 @@ func gameOverSummary(room *Room) {
 // 用户加入房间通知
 func userJoinNotify(client *Client) {
 	room := client.room
-	message := Message{
-		"method" : "userjoin",
-		"roomID" : room.RoomID,
-		"user" : Message{
-			"userID": client.user.UserID,
-			"userName": client.user.UserName,
+
+	// 求出1，2，3名，并计算获得积分值
+	userList := []Message{
+	}
+	for _, client := range room.ClientList {
+		userList = append(userList, Message{
+			"userID" : client.user.UserID,
+			"userName" : client.user.UserName,
 			"roadID": client.user.RoadID,
 			"petID": client.user.PetID,
 			"avatar": client.user.Avatar,
 			"sex": client.user.Sex,
 			"score": client.user.Score,
 			"rank": client.user.Rank,
-		},
+		})
 	}
+
+	message := Message{
+		"method" : "userjoin",
+		"roomID" : room.RoomID,
+		"userList" : userList,
+	}
+
+	fmt.Println(message)
 
 	// 广播
 	room.broadcast(message)

@@ -136,9 +136,13 @@ func preFilter(r *http.Request) bool {
 
 	authToken := r.Header.Get("Authorization")
 	if authToken == "" {
-		fmt.Println("authorization is empty")
-		return false
+		authToken = r.Header.Get("Sec-WebSocket-Protocol")
+		if authToken == "" {
+			fmt.Println("authorization is empty")
+			return false
+		}
 	}
+	fmt.Println("authorization:", authToken)
 	oauthClient, _ := oauth.NewOAuthClient("oauth", nil, nil)
 
 	resp, remoteErr := oauthClient.CheckToken(context.Background(), nil, &pb.CheckTokenRequest{

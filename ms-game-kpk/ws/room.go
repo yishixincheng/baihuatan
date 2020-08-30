@@ -75,6 +75,7 @@ func (p *Room) broadcast(message Message) {
 		fmt.Println("invalid message:", err)
 		return
 	}
+	fmt.Println("广播消息", messageByte)
 	// 塞入通道
 	p.broadcasts <- messageByte
 }
@@ -145,6 +146,8 @@ func (p *RoomManager) MatchingRoom(client *Client) (*Room, error) {
 		if err = redisConn.LPush(roomQueueKey, roomJSONStr).Err(); err != nil {
 			return nil, err
 		}
+		// 通知用户加入
+		userJoinNotify(client)
 		return room, nil
 	}
 
@@ -157,7 +160,8 @@ func (p *RoomManager) MatchingRoom(client *Client) (*Room, error) {
 	room, ok := p.RoomList[roomObj.RoomID]; 
 	if !ok {
 		return nil, fmt.Errorf("房间ID：%v 不存在", roomObj.RoomID)
-	} 
+	}
+	fmt.Println("匹配到房间：", room)
 	// 找到房间
 	if room.ClientNum >= room.ClientMaxNum {
 		return nil, fmt.Errorf("房间ID：%v 已满", roomObj.RoomID)
@@ -169,7 +173,8 @@ func (p *RoomManager) MatchingRoom(client *Client) (*Room, error) {
 	if room.ClientNum >= room.ClientMaxNum {
 		// 房间已满
 		room.Status = 1   // 人满待开始
-
+		// 通知用户加入
+		userJoinNotify(client)
 		return room, nil
 	}
 
@@ -179,6 +184,8 @@ func (p *RoomManager) MatchingRoom(client *Client) (*Room, error) {
 		return nil, err
 	}
 
+	fmt.Println("roomJsonStr：",roomJSONStr)
+
 	// 塞入缓存中
 	if err = redisConn.RPush(roomQueueKey, roomJSONStr).Err(); err != nil {
 		return nil, err
@@ -186,7 +193,6 @@ func (p *RoomManager) MatchingRoom(client *Client) (*Room, error) {
 
 	// 通知用户加入
 	userJoinNotify(client)
-
 	return room, nil
 }
 

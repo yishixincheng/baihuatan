@@ -71,12 +71,12 @@ func (p *UserModel) GetUser(userID int64) (*User, error) {
 		UserID: data["user_id"].(int64),
 		UserName: data["user_name"].(string),
 		Birthday: data["birthday"].(string),
-		Sex: int(data["sex"].(int32)),
+		Sex: int(data["sex"].(int64)),
 		Avatar: data["avatar"].(string),
 		City: data["city"].(string),
 		District: data["district"].(string),
 		Introduction: data["introduction"].(string),
-		RoleID: int(data["role_id"].(int32)),
+		RoleID: int(data["role_id"].(int64)),
 	}, nil
 }
 

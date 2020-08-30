@@ -66,7 +66,7 @@ func (manager *DefaultClientManager) DecoratorInvoke(ctx context.Context, path s
 		instances := manager.DiscoveryClient.DiscoverServices(manager.ServiceName, manager.Logger)
 		if instance, err := manager.LoadBalance.SelectService(instances); err == nil {
 			if instance.GrpcPort > 0 {
-				fmt.Println(instance.GrpcPort)
+				fmt.Println(instance.Host, ":", instance.GrpcPort, "-", inputVal)
 				if conn, err := grpc.Dial(instance.Host + ":" + strconv.Itoa(instance.GrpcPort), grpc.WithInsecure(),
 				    grpc.WithUnaryInterceptor(otgrpc.OpenTracingClientInterceptor(genTracer(tracer))), grpc.WithTimeout(1*time.Second)); err == nil {
 					if err = conn.Invoke(ctx, path, inputVal, outVal); err != nil {

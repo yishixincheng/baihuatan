@@ -71,12 +71,18 @@ func main() {
 	userEndpoint = ratelimiter.NewTokenBucketLimiterWithBuildIn(ratebucket)(userEndpoint)
 	userEndpoint = kitzipkin.TraceEndpoint(localconf.ZipkinTracer, "user-endpoint")(userEndpoint)
 
+	// userGet
+	userGetEndpoint := endpts.MakeUserGetEndpoint(svc)
+	userGetEndpoint = ratelimiter.NewTokenBucketLimiterWithBuildIn(ratebucket)(userGetEndpoint)
+	userGetEndpoint = kitzipkin.TraceEndpoint(localconf.ZipkinTracer, "user-get-endpoint")(userGetEndpoint)
+
 	// 健康检查Endpoint
 	healthEndpoint := endpts.MakeHealthCheckEndpoint(svc)
 	healthEndpoint = kitzipkin.TraceEndpoint(localconf.ZipkinTracer, "health-endpoint")(healthEndpoint)
 
 	endpoints := endpts.UserEndpoints{
 		UserEndpoint: userEndpoint,
+		UserGetEndpoint: userGetEndpoint,
 		HealthCheckEndpoint: healthEndpoint,
 	}
 

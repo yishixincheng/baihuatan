@@ -11,8 +11,7 @@ var err error
 
 // InitMysql 初始化
 func InitMysql(host, port, user, pwd, db string) {
-	fmt.Printf(user)
-	fmt.Printf(db)
+	fmt.Println(user, db)
 
 	DbConfig := gorose.Config{
 		Driver: "mysql",
