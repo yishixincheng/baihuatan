@@ -210,8 +210,6 @@ func ServeWs(ctx context.Context, roomM *RoomManager, w http.ResponseWriter, r *
 	// 匹配房间
 	room, err := roomM.MatchingRoom(client)
 
-	fmt.Println(*room)
-
 	if err != nil {
 		// 移除客户端
 		fmt.Println(err)
@@ -221,4 +219,7 @@ func ServeWs(ctx context.Context, roomM *RoomManager, w http.ResponseWriter, r *
 	go room.listen()
 	go client.writePump()
 	go client.readPump()
+
+	// 用户加入房间广播，不能放在
+	userJoinBroadcast(client)
 }

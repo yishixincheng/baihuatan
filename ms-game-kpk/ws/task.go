@@ -260,7 +260,7 @@ func gameOverSummary(room *Room) {
 }
 
 // 用户加入房间通知
-func userJoinNotify(client *Client) {
+func userJoinBroadcast(client *Client) {
 	room := client.room
 
 	// 求出1，2，3名，并计算获得积分值

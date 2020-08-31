@@ -46,13 +46,14 @@ func (p *Room) listen() {
 	for {
 		select {
 		case message := <-p.broadcasts:
+			fmt.Println("读到消息")
 			for _, client := range p.ClientList {
 				select {
 				case client.send <- message:
 				default:
 					//不阻塞，执行下一次循环
 				}
-			}		
+			}
 		}
 	}
 }
@@ -117,6 +118,7 @@ func (p *RoomManager) CreateRoom(client *Client) (*Room, error) {
 		Status: 0,
 		WinPace: winPace,
 		QuestionNum: questionNum,
+		broadcasts: make(chan []byte),
 	}
 	client.room = room
 	p.RoomList[room.RoomID] = room
@@ -147,7 +149,6 @@ func (p *RoomManager) MatchingRoom(client *Client) (*Room, error) {
 			return nil, err
 		}
 		// 通知用户加入
-		userJoinNotify(client)
 		return room, nil
 	}
 
@@ -174,7 +175,6 @@ func (p *RoomManager) MatchingRoom(client *Client) (*Room, error) {
 		// 房间已满
 		room.Status = 1   // 人满待开始
 		// 通知用户加入
-		userJoinNotify(client)
 		return room, nil
 	}
 
@@ -192,7 +192,6 @@ func (p *RoomManager) MatchingRoom(client *Client) (*Room, error) {
 	}
 
 	// 通知用户加入
-	userJoinNotify(client)
 	return room, nil
 }
 
