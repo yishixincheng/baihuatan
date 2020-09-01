@@ -97,7 +97,7 @@ func onAnswer(client *Client, message Message) error {
 	rightChoice := optionToChoice(result.RightOption)
 	// 正确
 	client.room.sendMsgToClient(client, Message{
-		"method": "answerResult",
+		"method": "answerresult",
 		"choice"      : choice,
 		"cursor"      : cursor,
 		"rightChoice" : rightChoice,
@@ -173,7 +173,7 @@ func onThrowProps(client *Client, message Message) error {
 // 发送战斗动态
 func responseFightDynamic(room *Room) error {
 	message := Message{
-		"method" : "fightDynamic",
+		"method" : "fightdynamic",
 		"roomID" : room.RoomID,
 		"status" : room.Status,
 	}
@@ -282,7 +282,9 @@ func userJoinBroadcast(client *Client) {
 	message := Message{
 		"method" : "userjoin",
 		"roomID" : room.RoomID,
+		"ownerUID" : room.OwnerUID, // 房主
 		"userList" : userList,
+		"status"   : room.Status,  // 1待开始
 	}
 
 	fmt.Println(message)

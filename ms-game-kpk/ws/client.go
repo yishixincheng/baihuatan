@@ -208,7 +208,7 @@ func ServeWs(ctx context.Context, roomM *RoomManager, w http.ResponseWriter, r *
 		send: make(chan []byte, 256),
 	}
 	// 匹配房间
-	room, err := roomM.MatchingRoom(client)
+	_, err = roomM.MatchingRoom(client)
 
 	if err != nil {
 		// 移除客户端
@@ -216,7 +216,6 @@ func ServeWs(ctx context.Context, roomM *RoomManager, w http.ResponseWriter, r *
 		roomM.RemoveClientFromRoom(client)
 	}
 
-	go room.listen()
 	go client.writePump()
 	go client.readPump()
 

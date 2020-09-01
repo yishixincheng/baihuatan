@@ -148,6 +148,9 @@ func (p *RoomManager) MatchingRoom(client *Client) (*Room, error) {
 		if err = redisConn.LPush(roomQueueKey, roomJSONStr).Err(); err != nil {
 			return nil, err
 		}
+
+		// 监听
+		go room.listen()
 		// 通知用户加入
 		return room, nil
 	}
@@ -168,7 +171,22 @@ func (p *RoomManager) MatchingRoom(client *Client) (*Room, error) {
 		return nil, fmt.Errorf("房间ID：%v 已满", roomObj.RoomID)
 	}
 	client.room   = room
-	room.ClientNum ++
+	
+
+	// 过滤相同用户
+	isSameUser := false
+	for pos, cl := range room.ClientList {
+		if (cl.user.UserID == client.user.UserID) {
+			client.user = cl.user
+			room.ClientList = append(room.ClientList[:pos], room.ClientList[pos+1:]...)
+			isSameUser =true
+			break
+		}
+	}
+	if !isSameUser {
+		room.ClientNum ++
+	}
+
 	room.ClientList = append(room.ClientList, client)
 
 	if room.ClientNum >= room.ClientMaxNum {
