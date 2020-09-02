@@ -143,13 +143,11 @@ func (c *Client) writePump() {
 				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
-			
 			w, err := c.conn.NextWriter(websocket.TextMessage)
 			if err != nil {
 				fmt.Println("nextWrite:", err)
 				return
 			}
-			fmt.Println("发送给客户端消息", message)
 			w.Write(message)
 
 			// Add queued chat messages to the current websocket message.

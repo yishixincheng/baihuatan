@@ -53,6 +53,9 @@ func onStart(client *Client, params Message) error {
 		})
 		return nil
 	}
+
+	fmt.Println(client.room.QuestionList)
+
 	// 开始游戏，发送题目
 	client.room.Status = 2 //开始
 	client.room.broadcast(Message{
@@ -281,13 +284,11 @@ func userJoinBroadcast(client *Client) {
 
 	message := Message{
 		"method" : "userjoin",
-		"roomID" : room.RoomID,
+		"roomID" :   room.RoomID,
 		"ownerUID" : room.OwnerUID, // 房主
 		"userList" : userList,
 		"status"   : room.Status,  // 1待开始
 	}
-
-	fmt.Println(message)
 
 	// 广播
 	room.broadcast(message)

@@ -8,7 +8,7 @@
 
             <mu-row class="join-user-list">
 
-                <mu-col v-for="(item,i) in userList" :key="i" :class="{'join-room-ower':room.ownerUID}">
+                <mu-col v-for="(item,i) in userList" :key="i" :class="room.ownerUID == item.userID ? 'join-room-ower' : ''">
                     <div class="join-user-avatar">
                        <img :src="item.avatar" />
                     </div>
@@ -20,7 +20,18 @@
                     </div>    
                 </mu-col>    
 
-            </mu-row>    
+            </mu-row>
+
+            <div class="join-user-start-tip">
+
+                <span v-if="gameStatus==0">
+                    等待其他玩家加入，请稍后...
+                </span>
+                <span v-else-if="gameStatus==1">
+                    准备开始 {{gameCountDown}}
+                </span>    
+
+            </div>        
 
         </div>    
 
@@ -86,7 +97,12 @@
     background: #fbc02d;
 }
 
-
+.join-user-start-tip {
+    position: absolute;
+    bottom: 10px;
+    text-align: center;
+    width: 100vw;
+}
 
 </style>
 
@@ -101,7 +117,9 @@ export default {
             showRoomView: false,
             showKpkView: false,
             userList: [],  // 用户列表
-            room: {}
+            room: {},
+            gameStatus : 0,
+            gameCountDown : 3
         }
     },
     mounted() {
@@ -177,9 +195,7 @@ export default {
            
 
         },
-        send: function () {
-            this.socket.send(params)
-        },
+
         close: function () {
             console.log("socket已经关闭")
         },
@@ -195,9 +211,29 @@ export default {
                 this.showRoomView = true
             }
             this.userList = data.userList||[]
-            console.log(this.userList)
             this.room.ownerUID = data.ownerUID
             this.room.roomID = data.roomID
+            this.room.myUID  = data.myUID
+            this.gameStatus = data.status
+
+            if (this.gameStatus == 1) {
+                // 倒计时
+                let timer = window.setInterval((e) => {
+                    
+                    this.gameCountDown --
+                    if (this.gameCountDown == 1) {
+                        // 房主发送发送开始请求
+                        if (this.room.myUID == this.room.ownerUID) {
+                            this.sendMessage({
+                                method : "start",
+                            })
+                        }
+                        window.clearInterval(timer)
+                    }
+
+                }, 1000)
+            }
+
 
         },
         /**
@@ -236,6 +272,11 @@ export default {
          */
         respError(data) {
             this.$toast.error(data.msg||"错误")
+        },
+
+        sendMessage(data) {
+            let message = JSON.stringify(data)
+            this.socket.send(message)
         }
     },
     destroyed () {

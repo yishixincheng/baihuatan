@@ -37,7 +37,7 @@ type Room struct {
 	QuestionNum    int        `json:"-" `             // 题库数量
 	WinPace        int        `json:"-"`              // 胜利的步数
 	// Inbound message from the clients.
-	broadcasts     chan []byte      
+	broadcasts     chan Message      
 	mutex          sync.Mutex      
 }
 
@@ -46,10 +46,16 @@ func (p *Room) listen() {
 	for {
 		select {
 		case message := <-p.broadcasts:
-			fmt.Println("读到消息")
 			for _, client := range p.ClientList {
+				message["myUID"] = client.user.UserID
+				fmt.Println("广播消息体", message)
+				messageByte, err := EncodeMessage(message)
+				if err != nil {
+					fmt.Println("invalid message:", err)
+					return
+				}
 				select {
-				case client.send <- message:
+				case client.send <- messageByte:
 				default:
 					//不阻塞，执行下一次循环
 				}
@@ -60,6 +66,7 @@ func (p *Room) listen() {
 
 // sendMsgToClient - 发送消息到客户端
 func (p *Room) sendMsgToClient(client *Client, message Message) {
+	fmt.Println("响应消息", message)
 	messageByte, err := EncodeMessage(message)
 	if err != nil {
 		fmt.Println("invalid message:", err)
@@ -71,14 +78,9 @@ func (p *Room) sendMsgToClient(client *Client, message Message) {
 
 // broadcast -- 广播到所有的客户端
 func (p *Room) broadcast(message Message) {
-	messageByte, err := EncodeMessage(message)
-	if err != nil {
-		fmt.Println("invalid message:", err)
-		return
-	}
-	fmt.Println("广播消息", messageByte)
+	fmt.Println("广播消息", message)
 	// 塞入通道
-	p.broadcasts <- messageByte
+	p.broadcasts <- message
 }
 
 // RoomManager 房间管理者
@@ -118,7 +120,7 @@ func (p *RoomManager) CreateRoom(client *Client) (*Room, error) {
 		Status: 0,
 		WinPace: winPace,
 		QuestionNum: questionNum,
-		broadcasts: make(chan []byte),
+		broadcasts: make(chan Message),
 	}
 	client.room = room
 	p.RoomList[room.RoomID] = room

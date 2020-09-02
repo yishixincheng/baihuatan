@@ -16,22 +16,22 @@ import (
 
 // KpkQuestion 题目列表
 type KpkQuestion struct {
-	ID           int64    `gorose:"id" json:"id"`        // ID
-	Title        string   `gorose:"title" json:"title"`     // 标题
-	Option1      string   `gorose:"option_1" json:"option_1"`  // 选项1
-	Option2      string   `gorose:"option_1" json:"option_2"`  // 选项2
-	Option3      string   `gorose:"option_1" json:"option_3"`  // 选项3
-	Option4      string   `gorose:"option_1" json:"option_4"`  // 选项4
+	ID           int64    `json:"id"`        // ID
+	Title        string   `json:"title"`     // 标题
+	Option1      string   `json:"option_1"`  // 选项1
+	Option2      string   `json:"option_2"`  // 选项2
+	Option3      string   `json:"option_3"`  // 选项3
+	Option4      string   `json:"option_4"`  // 选项4
 	
 }
 
 // KpkQuestionEx 扩展信息
 type KpkQuestionEx struct {
-	RightOption  string   `gorose:"right_option" json:"right_option"`         // 正确选项
-	Annotation   string   `gorose:"annotation" json:"annotation"`             // 注释
-	AuthorID     int64    `gorose:"right_option" json:"author_id"`
-	CateID       int64    `gorose:"right_option" json:"cate_id"`
-	UpdateTs       string  `gorose:"right_option" json:"update_ts"` // 更新时间
+	RightOption  string    `json:"right_option"`         // 正确选项
+	Annotation   string    `json:"annotation"`             // 注释
+	AuthorID     int64     `json:"author_id"`
+	CateID       int64     `json:"cate_id"`
+	UpdateTs       string  `json:"update_ts"` // 更新时间
 }
 
 // KpkQuestionAll -
@@ -39,9 +39,9 @@ type KpkQuestionAll struct {
 	ID           int64    `gorose:"id" json:"id"`        // ID
 	Title        string   `gorose:"title" json:"title"`     // 标题
 	Option1      string   `gorose:"option_1" json:"option_1"`  // 选项1
-	Option2      string   `gorose:"option_1" json:"option_2"`  // 选项2
-	Option3      string   `gorose:"option_1" json:"option_3"`  // 选项3
-	Option4      string   `gorose:"option_1" json:"option_4"`  // 选项4
+	Option2      string   `gorose:"option_2" json:"option_2"`  // 选项2
+	Option3      string   `gorose:"option_3" json:"option_3"`  // 选项3
+	Option4      string   `gorose:"option_4" json:"option_4"`  // 选项4
 	RightOption  string   `gorose:"right_option" json:"right_option"`         // 正确选项
 	Annotation   string   `gorose:"annotation" json:"annotation"`             // 注释
 	AuthorID     int64    `gorose:"right_option" json:"author_id"`
@@ -168,7 +168,7 @@ func (p *KpkQuestionModel) GetQuestionListFromCache(num int64) ([]*KpkQuestion, 
 	kpkQuestionList := []*KpkQuestion{}
 
 	for _, v := range kpkQJSONList {
-		var kpkQuestionNode *KpkQuestion
+		var kpkQuestionNode = &KpkQuestion{}
 		json.Unmarshal([]byte(v.(string)), kpkQuestionNode)
 		kpkQuestionList = append(kpkQuestionList, kpkQuestionNode)
 	}
