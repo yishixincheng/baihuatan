@@ -37,7 +37,99 @@
 
         <!-- 答题视图-->
         <div class="kpk-view" v-if="showKpkView">
-            答题视图
+            
+            <div class="kpk-user-process">
+
+                 <div class="kpk-user-road" v-for="(item,i) in userList" :key="i">
+                     <div class="_user_profile">
+                         <div class="_avatar">
+                             <img :src="item.avatar" />
+                         </div>
+                         <div class="_username">
+                             {{item.userName}}
+                         </div>    
+                     </div>
+                     <!-- 跑道 -->
+                     <div class="_road_track">
+
+                         <div class="_ruler">
+                             <div class="_scale_line" v-for="(idx,i) in [1,2,3,4,5,6,7,8,9,10]" :key="i">
+                             </div>    
+                         </div>    
+                         <div :class="'_road' + ' ' + '_road_' + item.roadID">
+                         </div>    
+                         <div :class="'_pet' + ' ' + '_pet_' + item.petID">
+                         </div>
+
+                     </div>
+
+                 </div>    
+
+            </div> 
+
+            <section class="kpk-question">
+
+                  <header class="_question_title">
+                      <span>{{number}}. </span>
+                      <span>{{question.title}}</span>
+                  </header>
+
+                  <div class="_options-list">
+
+                      <div class="_option" wx:if="question.option_1">
+                          <span>A.</span>
+                          <span>{{question.option_1}}</span>
+                      </div>
+
+                      <div class="_option" wx:if="question.option_2">
+                          <span>B.</span>
+                          <span>{{question.option_2}}</span>
+                      </div>
+
+                      <div class="_option" wx:if="question.option_3">
+                          <span>C.</span>
+                          <span>{{question.option_3}}</span>
+                      </div>
+
+                      <div class="_option" wx:if="question.option_4">
+                          <span>D.</span>
+                          <span>{{question.option_4}}</span>
+                      </div>
+
+                  </div>
+
+                  <!-- 答题结果对话框 -->
+                  <div class="_answer_body">
+
+                      <div class="">
+                          回答正确
+                      </div>
+                      <div class="">
+                          回答错误，当前答案为：B
+                      </div>    
+
+                      <div class="">
+                          <a>下一题</a>
+                      </div>
+                  </div> 
+
+
+            </section>
+
+            <!-- 答题结束对话框 -->
+            <div class="kpk-gameover-dlg">
+
+                 <div>游戏结束</div>
+                 <div>
+                     恭喜您获得第一名，奖励积分5
+                 </div>
+                 <div>
+                     <a>点击回到首页</a>
+                     <span>3秒后系统系统自动跳转</span>
+                 </div>
+
+            </div>    
+
         </div>    
 
     </mu-container>    
@@ -119,7 +211,10 @@ export default {
             userList: [],  // 用户列表
             room: {},
             gameStatus : 0,
-            gameCountDown : 3
+            gameCountDown : 3,
+            question: {},
+            number: 1,
+            popAnswerCard: false, //是否弹出答题结果对话框
         }
     },
     mounted() {
@@ -209,6 +304,7 @@ export default {
             }
             if (!this.showRoomView) {
                 this.showRoomView = true
+                this.showKpkView = false
             }
             this.userList = data.userList||[]
             this.room.ownerUID = data.ownerUID
@@ -240,8 +336,13 @@ export default {
          * 开始游戏响应
          */
         respStart(data) {
-
-
+            console.log("开始游戏")
+            this.showRoomView = false
+            this.showKpkView  = true
+            // 问题
+            this.question = data.question
+            // 序号
+            this.number = data.number
         },
         /**
          * 返回新的题目
