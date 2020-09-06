@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"log"
 	"time"
+
 	"github.com/go-redis/redis"
 )
 
@@ -41,20 +42,21 @@ func NewKpkScoreModel() *KpkScoreModel {
 func (p *KpkScoreModel) IncScore(userID int64, score int64) bool {
 	p.GetKpkScore(userID) //自动创建
 	conn := mysql.DB()
-	_, err := conn.Table(&KpkScore{}).Where("user_id", userID).Data(map[string]interface{}{"score": score}).Increment()
+	_, err := conn.Table(&KpkScore{}).Where("user_id", userID).Increment("score", score)
 	
 	if err == nil {
 		// 清除缓存
 		ClearKpkUserCache(userID)
 		return true
 	}
+	fmt.Println(err)
 	return false
 }
 
 // BatchIncScore 批量增加积分
 func (p *KpkScoreModel) BatchIncScore(data []map[string]interface{}) {
 	for _, item := range data {
-		p.IncScore(item["userID"].(int64), item["score"].(int64))
+		p.IncScore(item["userID"].(int64), int64(item["score"].(int)))
 	}
 }
 

@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS  `kpk_record` (
     `id`          INT(10)      NOT NULL AUTO_INCREMENT,
     `user_id`     INT(10)      NOT NULL,
     `score`       INT(10)      NOT NULL DEFAULT 0 COMMENT '获取积分',
-    `room_id`    VARCHAR(32)  NOT NULL DEFAULT '' COMMENT '房间id',
+    `room_id`    VARCHAR(128)  NOT NULL DEFAULT '' COMMENT '房间id',
     `ranking`     TINYINT(2)   NOT NULL DEFAULT 0 COMMENT '名次',
     `question_count` INT(10)   NOT NULL DEFAULT 0 COMMENT '题目总数',
     `answer_count`   INT(10)   NOT NULL DEFAULT 0 COMMENT '答题总数',

@@ -72,8 +72,8 @@ func onStart(client *Client, params Message) error {
 // onAnswer - 答题动作
 func onAnswer(client *Client, message Message) error {
 	// 答题
-	cursor := message["cursor"].(int)     // 当前答题索引
-	choice := message["choice"].(string)  // 选择 A|B|C|D
+	cursor := int(message["cursor"].(float64))     // 当前答题索引
+	choice := message["choice"].(string)         // 选择 A|B|C|D
 
 	if cursor > client.indicator.cursor || cursor > len(client.room.QuestionList) - 1 {
 		client.room.sendMsgToClient(client, Message{
@@ -114,12 +114,12 @@ func onAnswer(client *Client, message Message) error {
 	if rightChoice == choice {
 		// 争取答题总数
 		client.indicator.right ++
-	}
-
-	client.indicator.pace = 2 * client.indicator.right - client.indicator.count
-	if client.indicator.pace < 0 {
-		// 不能小于0
-		client.indicator.pace = 0
+		client.indicator.pace ++
+	} else {
+		client.indicator.pace --
+		if client.indicator.pace < 0 {
+			client.indicator.pace = 0
+		}
 	}
 
 	responseFightDynamic(client.room)
@@ -154,9 +154,17 @@ func onNextQuestion(client *Client, message Message) error {
 
 	// 游标移动
 	client.indicator.cursor ++
+
+	if client.indicator.cursor > len(client.room.QuestionList) - 1 {
+		// 已经是最后一题了，游戏结束
+		gameOverSummary(client.room)
+		return nil
+	}
+
+
 	client.indicator.isAsk = false
 
-	client.room.broadcast(Message{
+	client.room.sendMsgToClient(client, Message{
 		"method" : "newquestion", 
 		"err" :  errNo,
 		"msg" : "请答题",
@@ -220,7 +228,7 @@ func gameOverSummary(room *Room) {
 			"pace"     : client.indicator.pace,
 			"right"    : client.indicator.right,
 			"count"    : client.indicator.count,
-			"core"     : 0,
+			"score"    : 0,
 		})
 	}
 
@@ -231,10 +239,10 @@ func gameOverSummary(room *Room) {
 
 	// 计算分值
 	if room.ClientNum > 2 {
-		userList[0]["core"] = 5
-		userList[1]["core"] = 2
+		userList[0]["score"] = 5
+		userList[1]["score"] = 2
 	} else {
-		userList[0]["core"] = 2
+		userList[0]["score"] = 2
 	}
 	message["userList"] = userList
 
@@ -255,6 +263,8 @@ func gameOverSummary(room *Room) {
 			"ranking" : (i+1),
 		})
 	}
+	fmt.Println("插入数据")
+	fmt.Println(insertData)
 	// 记录到表中
 	kpkRecordModel := model.NewKpkRecordModel()
 	kpkRecordModel.BatchAdd(insertData)

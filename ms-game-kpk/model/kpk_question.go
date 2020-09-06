@@ -31,22 +31,22 @@ type KpkQuestionEx struct {
 	Annotation   string    `json:"annotation"`             // 注释
 	AuthorID     int64     `json:"author_id"`
 	CateID       int64     `json:"cate_id"`
-	UpdateTs       string  `json:"update_ts"` // 更新时间
+	UpdateTs     time.Time  `json:"update_ts"` // 更新时间
 }
 
 // KpkQuestionAll -
 type KpkQuestionAll struct {
-	ID           int64    `gorose:"id" json:"id"`        // ID
-	Title        string   `gorose:"title" json:"title"`     // 标题
-	Option1      string   `gorose:"option_1" json:"option_1"`  // 选项1
-	Option2      string   `gorose:"option_2" json:"option_2"`  // 选项2
-	Option3      string   `gorose:"option_3" json:"option_3"`  // 选项3
-	Option4      string   `gorose:"option_4" json:"option_4"`  // 选项4
-	RightOption  string   `gorose:"right_option" json:"right_option"`         // 正确选项
-	Annotation   string   `gorose:"annotation" json:"annotation"`             // 注释
-	AuthorID     int64    `gorose:"right_option" json:"author_id"`
-	CateID       int64    `gorose:"right_option" json:"cate_id"`
-	UpdateTs     string   `gorose:"right_option" json:"update_ts"` // 更新时间
+	ID           int64      `gorose:"id" json:"id"`        // ID
+	Title        string     `gorose:"title" json:"title"`     // 标题
+	Option1      string     `gorose:"option_1" json:"option_1"`  // 选项1
+	Option2      string     `gorose:"option_2" json:"option_2"`  // 选项2
+	Option3      string     `gorose:"option_3" json:"option_3"`  // 选项3
+	Option4      string     `gorose:"option_4" json:"option_4"`  // 选项4
+	RightOption  string     `gorose:"right_option" json:"right_option"`         // 正确选项
+	Annotation   string     `gorose:"annotation" json:"annotation"`             // 注释
+	AuthorID     int64      `gorose:"author_id" json:"author_id"`
+	CateID       int64      `gorose:"cate_id" json:"cate_id"`
+	UpdateTs     time.Time  `gorose:"update_ts" json:"update_ts"` // 更新时间
 }
 
 // TableName -
@@ -192,10 +192,10 @@ func (p *KpkQuestionModel) GetQustionFromCache(ID int64) (*KpkQuestionAll, error
 
 		return  &KpkQuestionAll{
 				ID: result["id"].(int64),
-				RightOption: strconv.Itoa(result["right_option"].(int)),
+				RightOption: result["right_option"].(string),
 				Annotation:  result["annotation"].(string),
 				CateID:      result["cate_id"].(int64),
-				UpdateTs:    result["update_ts"].(string),
+				UpdateTs:    result["update_ts"].(time.Time),
 		}, nil
 	}
 	kpkQuestionAll := &KpkQuestionAll{}

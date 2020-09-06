@@ -5,6 +5,7 @@ import (
 	"baihuatan/pkg/common"
 	"log"
 	"time"
+	"fmt"
 )
 
 // KpkRecord 用户PK积分记录
@@ -56,6 +57,10 @@ func (p *KpkRecordModel) BatchAdd(data []map[string]interface{}) bool {
 	conn := mysql.DB()
 	_, err := conn.Table(&KpkRecord{}).Data(insertData).Insert()
 	
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	return err == nil
 }
 
