@@ -54,8 +54,6 @@ func onStart(client *Client, params Message) error {
 		return nil
 	}
 
-	fmt.Println(client.room.QuestionList)
-
 	// 开始游戏，发送题目
 	client.room.Status = 2 //开始
 	client.room.broadcast(Message{
@@ -75,11 +73,13 @@ func onAnswer(client *Client, message Message) error {
 	cursor := int(message["cursor"].(float64))     // 当前答题索引
 	choice := message["choice"].(string)         // 选择 A|B|C|D
 
-	if cursor > client.indicator.cursor || cursor > len(client.room.QuestionList) - 1 {
+	lastQuesionIdx := len(client.room.QuestionList) - 1 
+
+	if cursor > client.indicator.cursor || cursor > lastQuesionIdx {
 		client.room.sendMsgToClient(client, Message{
 			"method" : "error",
 			"err" : errInvalidParameter,
-			"msg" : "cursor is invalid",
+			"msg" : "已是最后一题",
 		})
 		return nil
 	}
@@ -125,7 +125,7 @@ func onAnswer(client *Client, message Message) error {
 	responseFightDynamic(client.room)
 
 	// 计算结果，率先答对10题，或者答完，则游戏结束计算战果
-	if (client.indicator.pace >= client.room.WinPace) && (client.indicator.count == client.room.QuestionNum) {
+	if (client.indicator.pace >= client.room.WinPace) || (client.indicator.count == client.room.QuestionNum) {
 		gameOverSummary(client.room)
 	}
 
@@ -138,7 +138,7 @@ func onNextQuestion(client *Client, message Message) error {
 		client.room.sendMsgToClient(client, Message{
 			"method": "error",
 			"err" : errOther,
-			"msg" : "PK游戏还未开始",
+			"msg" : "PK游戏结束，请重新匹配",
 		})
 		return nil
 	}
@@ -154,13 +154,15 @@ func onNextQuestion(client *Client, message Message) error {
 
 	// 游标移动
 	client.indicator.cursor ++
-
 	if client.indicator.cursor > len(client.room.QuestionList) - 1 {
 		// 已经是最后一题了，游戏结束
-		gameOverSummary(client.room)
+		client.room.sendMsgToClient(client, Message{
+			"method": "error",
+			"err" : errOther,
+			"msg" : "已是最后一题",
+		})
 		return nil
 	}
-
 
 	client.indicator.isAsk = false
 
@@ -234,7 +236,10 @@ func gameOverSummary(room *Room) {
 
 	// 降序排序
 	sort.Slice(userList, func(i, j int ) bool {
-		return userList[i]["pace"].(int) > userList[i]["pace"].(int)
+		if userList[i]["pace"].(int) == userList[j]["pace"].(int) {
+			return userList[i]["count"].(int) < userList[j]["count"].(int)
+		}
+		return userList[i]["pace"].(int) > userList[j]["pace"].(int)
 	})
 
 	// 计算分值
@@ -270,6 +275,9 @@ func gameOverSummary(room *Room) {
 	kpkRecordModel.BatchAdd(insertData)
 	kpkScoreModel := model.NewKpkScoreModel()
 	kpkScoreModel.BatchIncScore(insertData)
+
+	// 释放房间数据，断开链接
+	room.roomManager.ReleaseRoom(room)
 }
 
 // 用户加入房间通知

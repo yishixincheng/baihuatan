@@ -38,14 +38,19 @@ type Room struct {
 	WinPace        int        `json:"-"`              // 胜利的步数
 	// Inbound message from the clients.
 	broadcasts     chan Message      
-	mutex          sync.Mutex      
+	mutex          sync.Mutex
+	roomManager    *RoomManager   
 }
 
 // listen 监听消息
 func (p *Room) listen() {
 	for {
 		select {
-		case message := <-p.broadcasts:
+		case message, ok := <-p.broadcasts:
+			if (!ok) {
+				fmt.Println("房间解散，listen goroutine 退出")
+				return
+			}
 			for _, client := range p.ClientList {
 				message["myUID"] = client.user.UserID
 				fmt.Println("广播消息体", message)
@@ -121,6 +126,7 @@ func (p *RoomManager) CreateRoom(client *Client) (*Room, error) {
 		WinPace: winPace,
 		QuestionNum: questionNum,
 		broadcasts: make(chan Message),
+		roomManager: p,
 	}
 	client.room = room
 	p.RoomList[room.RoomID] = room
@@ -244,6 +250,22 @@ func (p *RoomManager) RemoveClientFromRoom(client *Client) {
 		delete(p.RoomList, roomID)
 	}
 	return
+}
+
+// ReleaseRoom - 释放房间
+func (p *RoomManager) ReleaseRoom(room *Room) {
+	if room == nil {
+		return
+	}
+
+	for _, client := range room.ClientList {
+		close(client.send) //关闭通道
+		client.conn.Close()
+	}
+
+	// 没有客户端则移除Room
+	close(room.broadcasts)
+	delete(p.RoomList, room.RoomID)
 }
 
 // GetKpkUser - 获取登录者信息

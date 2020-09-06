@@ -1,12 +1,12 @@
 package model
 
 import (
+	"baihuatan/pkg/common"
 	conf "baihuatan/pkg/config"
 	"baihuatan/pkg/mysql"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math/rand"
 	"strconv"
 	"sync"
 	"time"
@@ -128,7 +128,8 @@ func (p *KpkQuestionModel) GetQuestionList(keyword string, page, pageSize int64)
 }
 
 var (
-	questionKey = "QuestionStore"
+	questionKey     = "QuestionStore"
+	questionByIDKey = "QuestionStoreByID" // 通过id映射
 )
 
 // GetQuestionListFromCache - 从缓存中获取答题列表
@@ -143,23 +144,19 @@ func (p *KpkQuestionModel) GetQuestionListFromCache(num int64) ([]*KpkQuestion, 
 	if num > len {
 		num = len
 	}
-	rand.Seed(time.Now().UnixNano()) // 随机种子
 
-	var i int64 = 0
-	var rds = []string{}
-
-	C: 
-	for i = 0; i < num; i++ {
-		rd := rand.Intn(int(len)) // 产生随机数
-		for _, v := range rds {
-			if v == strconv.Itoa(rd) {
-				continue C
-			}
-		}
-		rds = append(rds, strconv.Itoa(rd))
+	var rds = []interface{}{}
+	for i := 0; i < int(num); i++ {
+		rds = append(rds, strconv.Itoa(i))
 	}
+	rRds := []string{}
+	rds = common.UpsetSlice(rds)
 
-	kpkQJSONList, err := conn.HMGet(questionKey, rds...).Result()
+	for _, v := range rds {
+		rRds = append(rRds, v.(string))
+	}
+	
+	kpkQJSONList, err := conn.HMGet(questionKey, rRds...).Result()
 
 	if err != nil {
 		return nil, err
@@ -179,7 +176,7 @@ func (p *KpkQuestionModel) GetQuestionListFromCache(num int64) ([]*KpkQuestion, 
 // GetQustionFromCache - 从缓存中获取某题的结果
 func (p *KpkQuestionModel) GetQustionFromCache(ID int64) (*KpkQuestionAll, error) {
 	redisConn := conf.Redis.RedisConn
-	kpkQuestionStr, err := redisConn.HGet(questionKey, strconv.Itoa(int(ID))).Result()
+	kpkQuestionStr, err := redisConn.HGet(questionByIDKey, strconv.FormatInt(ID, 10)).Result()
 
 	if err == redis.Nil {
 		// 不存在， 则读取数据库
@@ -227,14 +224,18 @@ func (p *KpkQuestionModel) AutoFetchQuestionsToCache(num int64) {
 	redisConn := conf.Redis.RedisConn
 
 	questionV := make(map[string]interface{})
+	questionByIDV := make(map[string]interface{})
 
 	for i, v := range questionList {
 		 jv, _ := json.Marshal(v)
-		 questionV[strconv.Itoa(i)] = string(jv)
+		 jvs := string(jv)
+		 questionV[strconv.Itoa(i)] = jvs
+		 questionByIDV[strconv.FormatInt(v.ID,10)] = jvs
 	}
 
 	// 设置到redis中 
 	redisConn.HMSet(questionKey, questionV)
+	redisConn.HMSet(questionByIDKey, questionByIDV)
 
 	return
 }

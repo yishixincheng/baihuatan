@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"time"
 	"strings"
+	"math/rand"
 )
 
 // IsWindows 判断是否是windows系统
@@ -69,4 +70,52 @@ func FormatTime(d time.Time, format string) string {
 		format = strings.Replace(format, k, v, -1)
     }
 	return d.Format(format)
+}
+
+// UpsetSlice 打乱切片
+func UpsetSlice(sli []interface{}) (aft []interface{}) {
+	num := len(sli)
+	if num == 0 {
+		return
+	}
+	rand.Seed(time.Now().UnixNano()) // 随机种子
+	sdIdxList := []int{}
+	C: 
+	for i := 0; i < num; i++ {
+		rd := rand.Intn(int(num)) // 产生随机数
+		for _, av := range sdIdxList {
+			if rd == av {
+				continue C
+			}
+		}
+		sdIdxList = append(sdIdxList, rd)
+	}
+
+	for _, idx := range sdIdxList {
+		aft = append(aft, sli[idx])
+	}
+	diffIdxList := []int{}
+	// 求差集
+	for i := 0; i < num; i++ {
+		isExist := false
+		for _, av := range sdIdxList {
+			if i == av {
+				isExist = true
+				break
+			}
+		}
+		if !isExist {
+			diffIdxList = append(diffIdxList, i)
+		}
+	}
+	
+	if len(diffIdxList) != 0 {
+		tmpSli := []interface{}{}
+		for _, i := range diffIdxList {
+			tmpSli = append(tmpSli, sli[i])
+		}
+		aft = append(aft,UpsetSlice(tmpSli)...)
+	}
+
+	return
 }

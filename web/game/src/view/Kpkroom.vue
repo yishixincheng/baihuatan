@@ -130,10 +130,19 @@
 
                     <div class="_gd_tip">游戏结束</div>
                     <div class="_gd_score">
-                        {{gameResultTip}}
+                        <mu-row>
+                            <mu-col>名次</mu-col>
+                            <mu-col>玩家</mu-col>
+                            <mu-col>得分</mu-col>
+                        </mu-row>
+                        <mu-row v-for="(item,i) in userRank" :key="i">
+                             <mu-col>{{i+1}}</mu-col>
+                             <mu-col>{{item.userName}}</mu-col>
+                             <mu-col>{{item.score}}</mu-col>
+                        </mu-row>        
                     </div>
                     <div class="_gd_back">
-                        <span>3秒后系统自动返回</span>
+                        <span>{{gameCountDown}}秒后系统自动返回</span>
                     </div>
                 </div> 
             </transition>   
@@ -206,13 +215,13 @@
 
 .kpk-gameover-dlg {
     width: 300px;
-    height: 200px;
+    height: 220px;
     border-radius: 10px;
     box-shadow: 1px 1px 3px #f8f8f8;
     position: absolute;
     z-index: 20;
     left: calc((100% - 300px)/2);
-    top: calc((100% - 200px)/2);
+    top: calc((100% - 220px)/2);
     background: linear-gradient(45deg,  #ffecb3, #ffe0b2);
 }
 
@@ -432,11 +441,11 @@
   }
   ._gd_score {
       text-align: center;
-      padding-top: 30px;
+      padding-top: 20px;
   }
   ._gd_back {
       text-align: center;
-      padding-top: 50px;
+      padding-top: 30px;
       color: #a1887f;
   }
 
@@ -477,8 +486,8 @@ export default {
             },
             resultIsRight: false,
             resultRightChoice: "",
-            gameResultTip: "",  //恭喜您获得第一名，奖励积分5
             resultAnnotation: "",
+            userRank: [] // 用户排名
         }
     },
     mounted() {
@@ -696,7 +705,19 @@ export default {
          * 游戏结束响应
          */
         respGameOver(data) {
+            this.openOverGameResult = true
+            this.userRank = data.userList
+            this.gameCountDown = 5
+            let timer = window.setInterval((e) => {
+                
+                this.gameCountDown --
+                if (this.gameCountDown == 1) {
+                    // 房主发送发送开始请求
+                    window.location = "/kpk"
+                    window.clearInterval(timer)
+                }
 
+            }, 1000)
         },
         /**
          * 错误消息响应
