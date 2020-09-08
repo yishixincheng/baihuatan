@@ -4,6 +4,7 @@ import (
 	"github.com/gohouse/gorose/v2"
 	"baihuatan/pkg/mysql"
 	"log"
+	"errors"
 )
 
 // User -
@@ -51,6 +52,9 @@ func (p *UserModel) CheckUser(username string, password string) (*User, error) {
 	if err != nil {
 		log.Printf("Error : %v", err)
 		return nil, err
+	}
+	if data == nil {
+		return nil, errors.New("用户名或密码不正确")
 	}
 	user := &User{
 		UserID: data["user_id"].(int64),

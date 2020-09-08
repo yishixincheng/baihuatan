@@ -11,11 +11,12 @@ import 'muse-ui/dist/muse-ui.css'
 import theme from 'muse-ui/lib/theme'
 import 'typeface-roboto'
 import less from 'less'
-import getAxios from './lib/getaxios'
+import newAxios from './lib/axios'
 
 Vue.config.productionTip = false
 Vue.prototype.$xl = Xl
-Vue.prototype.$axios = getAxios()
+Vue.prototype.$axios = newAxios()
+Vue.prototype.newAxios = newAxios
 
 Vue.use(less)
 Vue.use(MuseUI)

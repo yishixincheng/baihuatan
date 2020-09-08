@@ -69,8 +69,6 @@ export default {
             }
 
             this.$axios.post('/oauth/token?grant_type=password',data, {headers:{'Authorization':'Basic '+ this.$xl.b64EncodeUnicode('bht_user_clientId:123456')}}).then(response => {
-
-                    response = response.data;
                     if (response.access_token) {
                         // 登录成功
                         this.$toast.success('登录成功')

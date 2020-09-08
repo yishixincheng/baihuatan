@@ -28,11 +28,10 @@ func DecodeGRPCUserRequest(ctx context.Context, r interface{}) (interface{}, err
 // EncodeGRPCUserResponse -
 func EncodeGRPCUserResponse(_ context.Context, r interface{}) (interface{}, error) {
 	resp := r.(endpts.UserResponse)
-	
 	if resp.Error != nil {
 		return &pb.UserResponse{
 			Result: bool(resp.Result),
-			Err:  "error",
+			Err:  resp.Error.Error(),
 		}, nil
 	}
 

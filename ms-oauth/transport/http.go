@@ -26,7 +26,7 @@ var (
 	// ErrTokenRequest -
 	ErrTokenRequest = errors.New("invalid request token")
 	// ErrInvalidClientRequest -
-	ErrInvalidClientRequest = errors.New("invalid client message")
+	ErrInvalidClientRequest = errors.New("无效客户端")
 )
 
 // MakeHTTPHandler make http handler use mux
@@ -53,7 +53,7 @@ func MakeHTTPHandler(ctx context.Context, endpoints endpts.OAuth2Endpoints,
 	r.Methods("POST").Path("/token").Handler(kithttp.NewServer(
 		endpoints.TokenEndpoint,
 		decodeTokenRequest,
-		encodeJSONResponse,
+		encodeTokenResponse,
 		clientAuthorizationOptions...,
 	))
 	
@@ -127,6 +127,15 @@ func decodeCheckTokenRequest(ctx context.Context, r *http.Request) (interface{},
 
 // encodeJSONResponse -
 func encodeJSONResponse(ctx context.Context, w http.ResponseWriter, response interface{}) error {
+	w.Header().Set("Content-Type", "application/json;charset=utf-8")
+	return json.NewEncoder(w).Encode(response)
+}
+
+// encodeTokenResponse - 401错误
+func encodeTokenResponse(ctx context.Context, w http.ResponseWriter, response interface{}) error {
+	if _, ok := ctx.Value(endpts.OAuth2ErrorKey).(error); ok {
+		w.WriteHeader(http.StatusUnauthorized)
+	}
 	w.Header().Set("Content-Type", "application/json;charset=utf-8")
 	return json.NewEncoder(w).Encode(response)
 }

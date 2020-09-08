@@ -12,8 +12,6 @@ import (
 var (
 	// ErrInvalidAuthentication 无效鉴权
 	ErrInvalidAuthentication  = errors.New("Invalid auth")
-	// ErrInvalidUserInfo 无效用户
-	ErrInvalidUserInfo = errors.New("invalid user info")
 )
 
 // UserDetailsService 定义接口
@@ -41,8 +39,8 @@ func (service *RemoteUserService) GetUserDetailByUsername(ctx context.Context, u
 				Password: password,
 			}, nil
 		}
-		fmt.Println(response)
-		return nil, ErrInvalidUserInfo
+		fmt.Println(response.Err)
+		return nil, errors.New(response.Err)
 	}
 	return nil, err
 }
