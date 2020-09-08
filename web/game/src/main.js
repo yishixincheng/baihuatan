@@ -4,7 +4,6 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import Xl from './lib/xl.js'
-import axios from 'axios'
 import store from './store'
 import MuseUI from 'muse-ui'
 import Toast from 'muse-ui-toast'
@@ -12,13 +11,11 @@ import 'muse-ui/dist/muse-ui.css'
 import theme from 'muse-ui/lib/theme'
 import 'typeface-roboto'
 import less from 'less'
+import getAxios from './lib/getaxios'
 
 Vue.config.productionTip = false
-axios.defaults.headers.post["Content-type"] = "application/json"
-axios.defaults.baseURL="/api"
-
-Vue.prototype.$axios = axios
 Vue.prototype.$xl = Xl
+Vue.prototype.$axios = getAxios()
 
 Vue.use(less)
 Vue.use(MuseUI)
@@ -56,9 +53,6 @@ new Vue({
   components: { App },
   template: '<App/>',
   created() {
-    let token = localStorage.getItem("token")
-    this.$axios.defaults.headers.common['Authorization'] = token
-    
     //在页面加载时读取sessionStorage里的状态信息
     if (localStorage.getItem("store") ) {
         this.$store.replaceState(Object.assign({}, this.$store.state,JSON.parse(localStorage.getItem("store"))))
