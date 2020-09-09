@@ -39,6 +39,21 @@ func MakeHTTPHandler(ctx context.Context, endpoints endpts.KpkEndpoints, zipkinT
 		ws.ServeWs(ctx, ws.RoomM, w, r)
 	})
 
+	// 获取用户数据
+	r.Methods("POST").Path("/getuserdata").Handler(kithttp.NewServer(
+		endpoints.UserDataEndpoint,
+		decodeGetUserDataRequest,
+		encodeJSONResponse,
+		options...,
+	))
+
+	r.Methods("POST").Path("/open/getuserdata").Handler(kithttp.NewServer(
+		endpoints.UserDataEndpoint,
+		decodeGetUserDataRequest,
+		encodeJSONResponse,
+		options...,
+	))
+
 	r.Methods("GET").Path("/health").Handler(kithttp.NewServer(
 		endpoints.HealthCheckEndpoint,
 		decodeHealthCheckRequest,
@@ -60,6 +75,23 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"error": err.Error(),
 	})
+}
+
+// decodeGetUserDataRequest -
+func decodeGetUserDataRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	getUserRequest := endpts.GetUserDataRequest{}
+	if err := json.NewDecoder(r.Body).Decode(&getUserRequest); err != nil {
+		return nil, err
+	}
+	if getUserRequest.UserID == 0 {
+		userID, err := endpts.GetUserIDFromTokenParse(r)
+		if err != nil {
+			return nil, err
+		}
+		getUserRequest.UserID = userID
+	}
+
+	return &getUserRequest, nil
 }
 
 // decodeHealthCheckRequest -

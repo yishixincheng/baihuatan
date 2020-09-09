@@ -20,12 +20,12 @@ import (
 	"time"
 
 	"baihuatan/ms-game-kpk/middleware"
-	// "baihuatan/pkg/ratelimiter"
+	"baihuatan/pkg/ratelimiter"
 
 	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
 	kitzipkin "github.com/go-kit/kit/tracing/zipkin"
 	"github.com/prometheus/client_golang/prometheus"
-	// "golang.org/x/time/rate"
+	"golang.org/x/time/rate"
 )
 
 
@@ -60,7 +60,7 @@ func main() {
 		Help:      "Total duration of requests in microseconds.",
 	}, fieldKeys)
 
-	//ratebucket := rate.NewLimiter(rate.Every(time.Second * 1), 100)
+	ratebucket := rate.NewLimiter(rate.Every(time.Second * 1), 100)
 
 	var svc service.Service
 	svc = service.KpkService{}
@@ -74,8 +74,14 @@ func main() {
 	//healthEndpoint = ratelimiter.NewTokenBucketLimiterWithBuildIn(ratebucket)(healthEndpoint)
 	healthEndpoint = kitzipkin.TraceEndpoint(localconf.ZipkinTracer, "health-endpoint")(healthEndpoint)
 
+	// 用户信息获取
+	userDataEndpoint := endpts.MakeUserDataEndpoint(svc)
+	userDataEndpoint  = ratelimiter.NewTokenBucketLimiterWithBuildIn(ratebucket)(userDataEndpoint)
+	userDataEndpoint  = kitzipkin.TraceEndpoint(localconf.ZipkinTracer, "get-user-data")(userDataEndpoint)
+
 	endpoints := endpts.KpkEndpoints{
 		HealthCheckEndpoint: healthEndpoint,
+		UserDataEndpoint: userDataEndpoint,
 	}
 
 	// 创建http.Handler

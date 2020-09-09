@@ -395,11 +395,31 @@ export default {
         }
     },
     mounted() {
-
+        // 初始化数据
+        this.init();
     },
     methods: {
         joinGame(e, type) {
             this.$router.push({path:'/kpkroom',  query: {type}})
+        },
+        init() {
+            this.getUserInfo();
+        },
+        getUserInfo() {
+            console.log("xxx")
+            if (this.$store.islogin) {
+                console.log("没有登录！")
+                return;
+            }
+            this.$axios.post('/gamekpk/open/getuserdata', {userID:2}).then(response => {
+
+                console.log(response);
+
+            }).catch(error=>{
+
+                console.log(error)
+            })
+
         }
     }
 }

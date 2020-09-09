@@ -28,6 +28,6 @@ auth:
     -
       /oauth/**
     - 
-      /string/**  
+      /gamekpk/open/**
 
      
