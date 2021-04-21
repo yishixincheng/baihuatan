@@ -31,11 +31,11 @@ var (
 
 // MakeHTTPHandler make http handler use mux
 func MakeHTTPHandler(ctx context.Context, endpoints endpts.OAuth2Endpoints,
-		  tokenService service.TokenService, clientService service.ClientDetailsService,
-		  zipkinTracer *zipkin.Tracer, logger log.Logger) http.Handler {
+	tokenService service.TokenService, clientService service.ClientDetailsService,
+	zipkinTracer *zipkin.Tracer, logger log.Logger) http.Handler {
 	r := mux.NewRouter()
 	zipkinServer := kitzipkin.HTTPServerTrace(zipkinTracer, kitzipkin.Name("http-transport"))
-	
+
 	options := []kithttp.ServerOption{
 		kithttp.ServerErrorHandler(transport.NewLogErrorHandler(logger)),
 		kithttp.ServerErrorEncoder(encodeError),
@@ -49,14 +49,14 @@ func MakeHTTPHandler(ctx context.Context, endpoints endpts.OAuth2Endpoints,
 		kithttp.ServerErrorEncoder(encodeError),
 		zipkinServer,
 	}
-	
+
 	r.Methods("POST").Path("/token").Handler(kithttp.NewServer(
 		endpoints.TokenEndpoint,
 		decodeTokenRequest,
 		encodeTokenResponse,
 		clientAuthorizationOptions...,
 	))
-	
+
 	r.Methods("POST").Path("/check_token").Handler(kithttp.NewServer(
 		endpoints.CheckTokenEndpoint,
 		decodeCheckTokenRequest,
@@ -91,9 +91,10 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 func makeClientAuthorizationContext(clientDetailsService service.ClientDetailsService, logger log.Logger) kithttp.RequestFunc {
 	return func(ctx context.Context, r *http.Request) context.Context {
 		if clientID, clientSecret, ok := r.BasicAuth(); ok {
-			fmt.Println("baasic:" + clientID + ":" + clientSecret)
+			fmt.Println("basic:" + clientID + ":" + clientSecret)
 			clientDetails, err := clientDetailsService.GetClientDetailByClientID(ctx, clientID, clientSecret)
-		    if err == nil {
+			fmt.Println(clientDetails)
+			if err == nil {
 				return context.WithValue(ctx, endpts.OAuth2ClientDetailsKey, clientDetails)
 			}
 		}
@@ -109,11 +110,11 @@ func decodeTokenRequest(ctx context.Context, r *http.Request) (interface{}, erro
 	}
 	return &endpts.TokenRequest{
 		GrantType: grantType,
-		Reader: r,
+		Reader:    r,
 	}, nil
 }
 
-// decodeCheckTokenRequest - 
+// decodeCheckTokenRequest -
 func decodeCheckTokenRequest(ctx context.Context, r *http.Request) (interface{}, error) {
 	tokenValue := r.URL.Query().Get("token")
 	if tokenValue == "" {

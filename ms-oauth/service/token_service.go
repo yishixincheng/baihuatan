@@ -35,7 +35,7 @@ type TokenGranter interface {
 
 // ComposeTokenGranter -
 type ComposeTokenGranter struct {
-	TokenGrantDict     map[string]TokenGranter
+	TokenGrantDict map[string]TokenGranter
 }
 
 // NewComposeTokenGranter -
@@ -48,15 +48,13 @@ func NewComposeTokenGranter(tokenGranter map[string]TokenGranter) TokenGranter {
 // Grant 生成令牌
 func (tokenGranter *ComposeTokenGranter) Grant(ctx context.Context, grantType string, client *model.ClientDetails, reader *http.Request) (*model.OAuth2Token, error) {
 	dispatchGranter := tokenGranter.TokenGrantDict[grantType]
-	
+
 	if dispatchGranter == nil {
 		return nil, ErrNotSupportGrantType
 	}
 
 	return dispatchGranter.Grant(ctx, grantType, client, reader)
 }
-
-
 
 // TokenService -
 type TokenService interface {
@@ -72,20 +70,19 @@ type TokenService interface {
 	ReadAccessToken(tokenValue string) (*model.OAuth2Token, error)
 }
 
-
 // UsernamePasswordTokenGranter -
 type UsernamePasswordTokenGranter struct {
-	supportGrantType  string
+	supportGrantType   string
 	userDetailsService UserDetailsService
-	tokenService TokenService
+	tokenService       TokenService
 }
 
 // NewUsernamePasswordTokenGranter -
 func NewUsernamePasswordTokenGranter(grantType string, userDetailsService UserDetailsService, tokenService TokenService) TokenGranter {
 	return &UsernamePasswordTokenGranter{
-		supportGrantType: grantType,
+		supportGrantType:   grantType,
 		userDetailsService: userDetailsService,
-		tokenService: tokenService,
+		tokenService:       tokenService,
 	}
 }
 
@@ -96,6 +93,7 @@ func (tokenGranter *UsernamePasswordTokenGranter) Grant(ctx context.Context, gra
 	}
 	// 从请求体中获取用户名和密码
 	body, err := ioutil.ReadAll(reader.Body)
+	fmt.Println(body, "请求体")
 	if err != nil {
 		return nil, ErrNotEmptyUsernameAndPasswordRequest
 	}
@@ -110,7 +108,7 @@ func (tokenGranter *UsernamePasswordTokenGranter) Grant(ctx context.Context, gra
 		return nil, ErrNotEmptyUsernameAndPasswordRequest
 	}
 	// 验证用户名密码是否正确
-	fmt.Println("username and password:" + username + ":" +password)
+	fmt.Println("username and password:" + username + ":" + password)
 	userDetails, err := tokenGranter.userDetailsService.GetUserDetailByUsername(ctx, username, password)
 
 	if err != nil {
@@ -121,21 +119,21 @@ func (tokenGranter *UsernamePasswordTokenGranter) Grant(ctx context.Context, gra
 	// 根据用户信息和客户端信息生成访问令牌
 	return tokenGranter.tokenService.CreateAccessToken(&model.OAuth2Details{
 		Client: client,
-		User: userDetails,
+		User:   userDetails,
 	})
 }
 
 // RefreshTokenGranter -
 type RefreshTokenGranter struct {
 	supportGrantType string
-	tokenService  TokenService
+	tokenService     TokenService
 }
 
 // NewRefreshGranter -
 func NewRefreshGranter(grantType string, tokenService TokenService) TokenGranter {
 	return &RefreshTokenGranter{
 		supportGrantType: grantType,
-		tokenService: tokenService,
+		tokenService:     tokenService,
 	}
 }
 
@@ -154,18 +152,16 @@ func (tokenGranter *RefreshTokenGranter) Grant(ctx context.Context, grantType st
 	return tokenGranter.tokenService.RefreshAccessToken(refreshTokenValue)
 }
 
-
-
 // DefaultTokenService -
 type DefaultTokenService struct {
-	tokenStore  TokenStore
+	tokenStore    TokenStore
 	tokenEnhancer TokenEnhancer
 }
 
 // NewTokenService 创建服务
 func NewTokenService(tokenStore TokenStore, tokenEnhancer TokenEnhancer) TokenService {
 	return &DefaultTokenService{
-		tokenStore: tokenStore,
+		tokenStore:    tokenStore,
 		tokenEnhancer: tokenEnhancer,
 	}
 }
@@ -178,7 +174,7 @@ func (tokenService *DefaultTokenService) CreateAccessToken(oauth2Details *model.
 		// 存在未失效访问令牌，直接返回
 		if !existToken.IsExpired() {
 			tokenService.tokenStore.StoreAccessToken(existToken, oauth2Details)
-		    return existToken, nil
+			return existToken, nil
 		}
 		// 访问令牌已失效，移除
 		tokenService.tokenStore.RemoveAccessToken(existToken.TokenValue)
@@ -197,7 +193,7 @@ func (tokenService *DefaultTokenService) CreateAccessToken(oauth2Details *model.
 
 	// 生成新的访问令牌
 	accessToken, err := tokenService.createAccessToken(refreshToken, oauth2Details)
-    if err == nil {
+	if err == nil {
 		// 保存新生成令牌
 		tokenService.tokenStore.StoreAccessToken(accessToken, oauth2Details)
 		tokenService.tokenStore.StoreRefreshToken(refreshToken, oauth2Details)
@@ -212,8 +208,8 @@ func (tokenService *DefaultTokenService) createAccessToken(refreshToken *model.O
 	expiredTime := time.Now().Add(s)
 	accessToken := &model.OAuth2Token{
 		RefreshToken: refreshToken,
-		ExpiresTime: &expiredTime,
-		TokenValue: uuid.NewV4().String(),
+		ExpiresTime:  &expiredTime,
+		TokenValue:   uuid.NewV4().String(),
 	}
 
 	if tokenService.tokenEnhancer != nil {
@@ -229,7 +225,7 @@ func (tokenService *DefaultTokenService) createRefreshToken(oauth2Details *model
 	expiredTime := time.Now().Add(s)
 	refreshToken := &model.OAuth2Token{
 		ExpiresTime: &expiredTime,
-		TokenValue: uuid.NewV4().String(),
+		TokenValue:  uuid.NewV4().String(),
 	}
 
 	if tokenService.tokenEnhancer != nil {
@@ -261,7 +257,7 @@ func (tokenService *DefaultTokenService) RefreshAccessToken(refreshTokenValue st
 			refreshToken, err = tokenService.createRefreshToken(oauth2Details)
 			if err == nil {
 				accessToken, err := tokenService.createAccessToken(refreshToken, oauth2Details)
-			    if err == nil {
+				if err == nil {
 					tokenService.tokenStore.StoreAccessToken(accessToken, oauth2Details)
 					tokenService.tokenStore.StoreRefreshToken(refreshToken, oauth2Details)
 				}
@@ -291,8 +287,8 @@ func (tokenService *DefaultTokenService) GetOAuth2DetailsByAccessToken(tokenValu
 			return nil, ErrExpiredToken
 		}
 		return tokenService.tokenStore.ReadOAuth2Details(tokenValue)
-	 }
-	 return nil, err
+	}
+	return nil, err
 }
 
 // TokenStore -
@@ -388,15 +384,15 @@ type TokenEnhancer interface {
 
 // OAuth2TokenCustomClaims -
 type OAuth2TokenCustomClaims struct {
-	UserDetails model.UserDetails
+	UserDetails   model.UserDetails
 	ClientDetails model.ClientDetails
-	RefreshToken model.OAuth2Token
+	RefreshToken  model.OAuth2Token
 	jwt.StandardClaims
 }
 
 // JwtTokenEnhancer -
 type JwtTokenEnhancer struct {
-	secretKey  []byte
+	secretKey []byte
 }
 
 // Enhance - 组装Token信息
@@ -415,13 +411,13 @@ func (enhancer *JwtTokenEnhancer) Extract(tokenValue string) (*model.OAuth2Token
 		expiresTime := time.Unix(claims.ExpiresAt, 0)
 
 		return &model.OAuth2Token{
-			RefreshToken: &claims.RefreshToken,
-			TokenValue: tokenValue,
-			ExpiresTime: &expiresTime,
-		}, &model.OAuth2Details{
-			User: &claims.UserDetails,
-			Client: &claims.ClientDetails,
-		}, nil
+				RefreshToken: &claims.RefreshToken,
+				TokenValue:   tokenValue,
+				ExpiresTime:  &expiresTime,
+			}, &model.OAuth2Details{
+				User:   &claims.UserDetails,
+				Client: &claims.ClientDetails,
+			}, nil
 	}
 	return nil, nil, err
 }
@@ -435,11 +431,11 @@ func (enhancer *JwtTokenEnhancer) sign(oauth2Token *model.OAuth2Token, oauth2Det
 	userDetails.Password = ""
 
 	claims := OAuth2TokenCustomClaims{
-		UserDetails: userDetails,
+		UserDetails:   userDetails,
 		ClientDetails: clientDetails,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expireTime.Unix(),
-			Issuer: "System",
+			Issuer:    "System",
 		},
 	}
 
@@ -458,7 +454,6 @@ func (enhancer *JwtTokenEnhancer) sign(oauth2Token *model.OAuth2Token, oauth2Det
 	}
 	return nil, err
 }
-
 
 // NewJwtTokenEnhancer -
 func NewJwtTokenEnhancer(secretKey string) TokenEnhancer {

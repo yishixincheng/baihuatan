@@ -1,0 +1,36 @@
+
+http:
+  host: 192.168.43.94
+  port: 9021
+
+rpc:
+  port: 9121
+
+discover:
+  host: 192.168.43.251
+  port: 8500
+  instanceId: ms-admin-baihuatan
+  serviceName: admin
+  weight: 1
+
+trace:
+  host: 192.168.43.251
+  port: 9411
+  url: /api/v2/spans
+
+config:
+  id: admin
+  profile: "dev"
+  label: "master"
+
+mysql:
+  host: 192.168.43.251
+  port: 8306
+  user: baihuatandb
+  pwd: baihuatan2020
+  db: bht_game
+
+redis:
+  host: 192.168.43.251:6379
+  password: 
+  db: 0
